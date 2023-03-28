@@ -1,6 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.controllers
 
-import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEdit
+import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
+import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
 import com.kandrac.tomco.takeawalkspring.responseEntities.MessageObj
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
 import com.kandrac.tomco.takeawalkspring.services.*
@@ -64,7 +65,7 @@ class RestController {
 
 //    Profile edit
     @PutMapping(value = ["/user/{user-id}/edit"])
-    fun editUserProfile(@PathVariable("user-id") userId: Int, @RequestBody data: ProfileEdit): ResponseEntity<String> {
+    fun editUserProfile(@PathVariable("user-id") userId: Int, @RequestBody data: ProfileEditData): ResponseEntity<String> {
         return if (userService.updateUserProfile(userId, data))
             ResponseEntity.status(HttpStatus.OK).body("Success") else ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found")
     }
@@ -72,8 +73,8 @@ class RestController {
     @PutMapping(value = ["/user/{user-id}/profile-picture"])
     fun editUserProfile(@PathVariable("user-id") userId: Int, file: MultipartFile): ResponseEntity<String> {
         return if (userService.updateUserProfileImage(userId, file.bytes))
-            ResponseEntity.status(HttpStatus.OK).body("Success") else
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found")
+            ResponseEntity.ok("Success") else
+                ResponseEntity.badRequest().body("User not found")
     }
 
 //    Chat
@@ -83,5 +84,12 @@ class RestController {
         return messageService.getEventMessages(eventId)
     }
 
+    @PostMapping(value = ["chat/{event-id}/message"])
+    fun postEventMessage(
+        @PathVariable("event-id") eventId: Int,
+        @RequestBody message: MessageData) : ResponseEntity<String> {
+        return if (messageService.addEventMessage(eventId, message))
+            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
 
 }

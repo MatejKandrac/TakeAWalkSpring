@@ -1,7 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.services
 
 import com.kandrac.tomco.takeawalkspring.entities.User
-import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEdit
+import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,7 +23,7 @@ class UserService {
         )
     }
 
-    fun updateUserProfile(userId: Int, data: ProfileEdit) : Boolean {
+    fun updateUserProfile(userId: Int, data: ProfileEditData) : Boolean {
         val user: User = userRepository.findUserById(userId) ?: return false
         user.username = data.username ?: user.username
         user.password = data.password ?: user.password
