@@ -47,20 +47,20 @@ CREATE TABLE events
     CONSTRAINT event_user FOREIGN KEY (owner_id) REFERENCES users (id)
 );
 
-insert into events
-values ('100', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
-        '100', '100', '0');
-insert into events
-values ('101', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
-        '100', '100', '0');
-insert into events
-values ('102', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
-        '100', '100', '0');
-insert into events
-values ('103', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
-        '100', '100', '0');
+-- insert into events
+-- values ('100', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
+--         '100', '100', '0');
+-- insert into events
+-- values ('101', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
+--         '100', '100', '0');
+-- insert into events
+-- values ('102', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
+--         '100', '100', '0');
+-- insert into events
+-- values ('103', '5', 'firstevent', 'false', '2020-06-22 19:10:25-07', '2020-06-22 19:10:25-07', 'firstdescription',
+--         '100', '100', '0');
 
-CREATE TYPE STATUS AS ENUM ('Accepted', 'Declined', 'Pending');
+CREATE TYPE STATUS AS ENUM ('ACCEPTED', 'DECLINED', 'PENDING');
 
 
 CREATE TABLE invites
@@ -68,37 +68,38 @@ CREATE TABLE invites
     id       SERIAL NOT NULL PRIMARY KEY,
     event_id INT    NOT NULL,
     user_id  INT    NOT NULL,
-    status   STATUS NOT NULL DEFAULT 'Pending',
+    status   STATUS NOT NULL DEFAULT 'PENDING',
     CONSTRAINT invites_event FOREIGN KEY (event_id) REFERENCES events (id),
     CONSTRAINT invites_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-insert into invites
-values ('1', '100', '5', 'Pending');
-insert into invites
-values ('2', '101', '5', 'Pending');
-insert into invites
-values ('3', '102', '5', 'Pending');
-insert into invites
-values ('4', '103', '6', 'Pending');
+-- insert into invites
+-- values ('1', '100', '5', 'Pending');
+-- insert into invites
+-- values ('2', '101', '5', 'Pending');
+-- insert into invites
+-- values ('3', '102', '5', 'Pending');
+-- insert into invites
+-- values ('4', '103', '6', 'Pending');
 
 CREATE TABLE locations
 (
-    id        SERIAL           NOT NULL PRIMARY KEY,
-    event_id  INT              NOT NULL,
-    "name"    TEXT             NOT NULL,
-    latitude  DOUBLE PRECISION NOT NULL,
-    longitude DOUBLE PRECISION NOT NULL,
-    visited   BOOL             NOT NULL DEFAULT false,
-    "order"   INT              NOT NULL,
+    id               SERIAL           NOT NULL PRIMARY KEY,
+    event_id         INT              NOT NULL,
+    "name"           TEXT             NOT NULL,
+    latitude         DOUBLE PRECISION NOT NULL,
+    longitude        DOUBLE PRECISION NOT NULL,
+    visited          BOOL             NOT NULL DEFAULT false,
+    "location_order" INT              NOT NULL,
     CONSTRAINT locations_event FOREIGN KEY (event_id) REFERENCES events (id)
 );
 
 CREATE TABLE pictures
 (
-    id       SERIAL NOT NULL PRIMARY KEY,
-    event_id INT    NOT NULL,
-    link     TEXT   NOT NULL,
+    id       SERIAL  NOT NULL PRIMARY KEY,
+    event_id INT     NOT NULL,
+    link     TEXT    NOT NULL,
+    deleted  BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT pictures_event FOREIGN KEY (event_id) REFERENCES events (id)
 );
 
@@ -113,13 +114,13 @@ CREATE TABLE messages
     CONSTRAINT messages_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-insert into messages
-values ('1', 100, '5', 'first ever test message', '2020-06-22 19:10:25-07');
-insert into messages
-values ('2', '100', '5', 'second ever test message', '2020-06-22 19:10:25-07');
-insert into messages
-values ('3', '100', '5', 'third ever test message', '2020-06-22 19:10:25-07');
-insert into messages
-values ('4', '100', '5', 'fourth ever test message', '2020-06-22 19:10:25-07');
-insert into messages
-values ('5', '100', '5', 'fifth ever test message', '2020-06-22 19:10:25-07');
+-- insert into messages
+-- values ('1', 100, '5', 'first ever test message', '2020-06-22 19:10:25-07');
+-- insert into messages
+-- values ('2', '100', '5', 'second ever test message', '2020-06-22 19:10:25-07');
+-- insert into messages
+-- values ('3', '100', '5', 'third ever test message', '2020-06-22 19:10:25-07');
+-- insert into messages
+-- values ('4', '100', '5', 'fourth ever test message', '2020-06-22 19:10:25-07');
+-- insert into messages
+-- values ('5', '100', '5', 'fifth ever test message', '2020-06-22 19:10:25-07');

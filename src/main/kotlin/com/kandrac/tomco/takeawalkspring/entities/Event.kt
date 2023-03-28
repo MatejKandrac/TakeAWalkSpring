@@ -8,14 +8,14 @@ import java.sql.Timestamp
 class Event(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null,
 
     var name: String? = null,
 
     var description: String? = null,
 
-    var cancelled: Boolean? = null,
+    var cancelled: Boolean = false,
 
     var start: Timestamp? = null,
 
@@ -29,7 +29,7 @@ class Event(
     var ownerLon: Double? = null,
 
     @Column(name = "actual_location")
-    var actualLocation: Int? = null,
+    var actualLocation: Int = 0,
 
 
     @ManyToOne(cascade = [CascadeType.ALL])

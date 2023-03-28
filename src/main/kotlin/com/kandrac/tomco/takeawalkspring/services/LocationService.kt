@@ -10,4 +10,10 @@ class LocationService {
     @Autowired
     lateinit var locationRepository: LocationRepository
 
+    fun updateLocation(eventId: Int, id: Int): Boolean {
+        val location = locationRepository.findLocationById(id) ?: return false
+        location.visited = true
+        locationRepository.save(location)
+        return true
+    }
 }

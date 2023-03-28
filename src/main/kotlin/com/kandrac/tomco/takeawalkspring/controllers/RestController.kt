@@ -1,5 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.controllers
 
+import com.kandrac.tomco.takeawalkspring.entities.Picture
+import com.kandrac.tomco.takeawalkspring.payloadEntities.CreateEventData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
 import com.kandrac.tomco.takeawalkspring.responseEntities.MessageObj
@@ -92,4 +94,59 @@ class RestController {
             ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
     }
 
+//    Event Progress
+    @GetMapping(value = ["event/{event-id}/pictures"])
+    fun getEventPictures(@PathVariable("event-id") eventId: Int): List<Picture>? {
+        return pictureService.getEventPictures(eventId)
+    }
+
+    @PostMapping(value = ["event/{event-id}/picture"])
+    fun postEventPicture(
+        @PathVariable("event-id") eventId: Int,
+        file: MultipartFile
+    ) : ResponseEntity<String> {
+        return if (pictureService.postEventPicture(eventId, file.bytes))
+            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
+
+
+    //TODO consider deleting by id, no event id needed
+    @DeleteMapping(value = ["event/{event-id}/picture"])
+    fun deleteEventPicture(
+        @PathVariable("event-id") eventId: Int,
+        @RequestBody data: Map<String, Any>
+    ) : ResponseEntity<String> {
+        if (!data.containsKey("picture_id")) return ResponseEntity.badRequest().body("No picture id provided")
+        return if (pictureService.deleteEventImage(eventId, data["picture_id"]!! as Int))
+            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
+
+    @PutMapping(value = ["event/{event-id}/description"])
+    fun updateEventDescription(
+        @PathVariable("event-id") eventId: Int,
+        @RequestBody data: Map<String, Any>
+    ) : ResponseEntity<String> {
+        if (!data.containsKey("description")) return ResponseEntity.badRequest().body("No description id provided")
+        return if (eventService.updateDescription(eventId, data["description"]!! as String))
+            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
+
+
+    //TODO event not needed here
+    @PutMapping(value = ["event/{event-id}/location-status"])
+    fun updateLocationStatus(
+        @PathVariable("event-id") eventId: Int,
+        @RequestBody data: Map<String, Any>
+    ) : ResponseEntity<String> {
+        if (!data.containsKey("location_id")) return ResponseEntity.badRequest().body("No description id provided")
+        return if (locationService.updateLocation(eventId, data["location_id"]!! as Int))
+            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
+
+    @PostMapping(value = ["event"])
+    fun createEvent(
+        @RequestBody data: CreateEventData
+    ) : Int? {
+        return eventService.createEvent(data)
+    }
 }

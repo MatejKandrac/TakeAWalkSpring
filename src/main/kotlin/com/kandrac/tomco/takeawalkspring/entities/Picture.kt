@@ -12,7 +12,9 @@ class Picture(
 
     var link: String? = null,
 
-    @ManyToOne(cascade = [CascadeType.ALL])
+    var deleted: Boolean = false,
+
+    @ManyToOne(cascade = [CascadeType.REMOVE])
     @JoinColumn(name = "event_id")
     var event: Event? = null
 
