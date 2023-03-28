@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface EventRepository : JpaRepository<Event, Long> {
 
+    fun findEventById(eventId: Int): Event?
+
 }

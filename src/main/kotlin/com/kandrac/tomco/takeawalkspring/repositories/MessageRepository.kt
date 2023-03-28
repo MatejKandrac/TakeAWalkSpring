@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface MessageRepository : JpaRepository<Message, Long> {
 
+    fun findMessagesByEvent_Id(eventId: Int): List<Message>?
 
 }
