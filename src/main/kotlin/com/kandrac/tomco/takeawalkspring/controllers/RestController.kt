@@ -1,13 +1,15 @@
 package com.kandrac.tomco.takeawalkspring.controllers
 
+import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEdit
 import com.kandrac.tomco.takeawalkspring.responseEntities.MessageObj
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
 import com.kandrac.tomco.takeawalkspring.services.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping(value = ["/v1"])
@@ -60,6 +62,19 @@ class RestController {
         return userService.getUserProfile(userId)
     }
 
+//    Profile edit
+    @PutMapping(value = ["/user/{user-id}/edit"])
+    fun editUserProfile(@PathVariable("user-id") userId: Int, @RequestBody data: ProfileEdit): ResponseEntity<String> {
+        return if (userService.updateUserProfile(userId, data))
+            ResponseEntity.status(HttpStatus.OK).body("Success") else ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found")
+    }
+
+    @PutMapping(value = ["/user/{user-id}/profile-picture"])
+    fun editUserProfile(@PathVariable("user-id") userId: Int, file: MultipartFile): ResponseEntity<String> {
+        return if (userService.updateUserProfileImage(userId, file.bytes))
+            ResponseEntity.status(HttpStatus.OK).body("Success") else
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found")
+    }
 
 //    Chat
     @GetMapping(value = ["/chat/{event-id}/messages"])
