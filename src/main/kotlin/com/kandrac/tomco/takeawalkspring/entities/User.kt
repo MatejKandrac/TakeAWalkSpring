@@ -31,6 +31,9 @@ class User(
     var invites: List<Invite>? = null,
 
     @OneToMany(mappedBy = "user")
-    var messages: List<Message>? = null
+    var messages: List<Message>? = null,
+
+    @OneToOne(mappedBy = "user")
+    var refreshToken: RefreshToken? = null
 
 )
