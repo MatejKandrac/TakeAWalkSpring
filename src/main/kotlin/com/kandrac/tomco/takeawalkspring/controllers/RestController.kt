@@ -106,7 +106,7 @@ class RestController {
         @PathVariable("event-id") eventId: Int,
         file: MultipartFile
     ) : ResponseEntity<String> {
-        return if (pictureService.postEventPicture(eventId, file.bytes))
+        return if (pictureService.postEventPicture(eventId, file))
             ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
     }
 
