@@ -15,9 +15,15 @@ class PictureService {
     @Autowired
     lateinit var eventRepository: EventRepository
 
-    fun getEventPictures(eventId: Int): List<Picture>? {
+    fun getEventPictures(eventId: Int): List<String?>? {
         val event = eventRepository.findEventById(eventId) ?: return null
-        return pictureRepository.findPicturesByEvent(event)
+        val list = mutableListOf<String?>()
+        val pictures = pictureRepository.findPicturesByEvent(event) ?: return null
+        pictures.forEach {
+            if (!it.deleted)
+                list.add(it.link)
+        }
+        return list.toList()
     }
 
     fun postEventPicture(eventId: Int, file: ByteArray): Boolean {

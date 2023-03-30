@@ -9,6 +9,7 @@ import com.kandrac.tomco.takeawalkspring.repositories.EventRepository
 import com.kandrac.tomco.takeawalkspring.repositories.InviteRepository
 import com.kandrac.tomco.takeawalkspring.repositories.LocationRepository
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
+import com.kandrac.tomco.takeawalkspring.responseEntities.MapEventObj
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -77,6 +78,26 @@ class EventService {
         }
 
         return event.id
+    }
+
+    fun getMapLocations(userId: Int, limit: Int): List<MapEventObj>? {
+        val events = eventRepository.findEventsByUserOrderByStart(userId, limit) ?: return null
+        val result = mutableListOf<MapEventObj>()
+        events.forEach {
+            val location = locationRepository.findFirsLocationByEvent(it.id!!)
+            if (location != null) {
+                result.add(MapEventObj(
+                    lat = location.latitude!!,
+                    lon = location.longitude!!,
+                    name = it.name!!,
+                    eventId = it.id!!,
+                    dateEnd = it.endDate!!,
+                    dateStart = it.start!!
+                    )
+                )
+            }
+        }
+        return result
     }
 
 }

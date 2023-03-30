@@ -4,6 +4,7 @@ import com.kandrac.tomco.takeawalkspring.entities.Picture
 import com.kandrac.tomco.takeawalkspring.payloadEntities.CreateEventData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
+import com.kandrac.tomco.takeawalkspring.responseEntities.MapEventObj
 import com.kandrac.tomco.takeawalkspring.responseEntities.MessageObj
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
 import com.kandrac.tomco.takeawalkspring.services.*
@@ -96,7 +97,7 @@ class RestController {
 
 //    Event Progress
     @GetMapping(value = ["event/{event-id}/pictures"])
-    fun getEventPictures(@PathVariable("event-id") eventId: Int): List<Picture>? {
+    fun getEventPictures(@PathVariable("event-id") eventId: Int): List<String?>? {
         return pictureService.getEventPictures(eventId)
     }
 
@@ -149,4 +150,14 @@ class RestController {
     ) : Int? {
         return eventService.createEvent(data)
     }
+
+//    Map
+    @GetMapping(value = ["events/{user-id}/map/my-events"])
+    fun getMapEvents(
+        @PathVariable("user-id") userId: Int,
+        @RequestParam limit: Int?
+    ) : List<MapEventObj>? {
+        return eventService.getMapLocations(userId, limit ?: 5)
+    }
+
 }
