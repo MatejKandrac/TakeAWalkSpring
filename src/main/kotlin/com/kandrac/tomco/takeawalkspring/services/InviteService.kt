@@ -10,8 +10,8 @@ class InviteService {
     @Autowired
     lateinit var inviteRepository: InviteRepository
 
-    fun getInvitePeople(eventId: Int): List<String>? {
-        return inviteRepository.getInvitePeople(eventId)
+    fun getEventPeople(eventId: Int): List<String>? {
+        return inviteRepository.getEventPeople(eventId)
     }
 
     fun getInviteStatus(userId: Int, eventId: Int): String? {

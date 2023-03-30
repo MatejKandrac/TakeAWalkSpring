@@ -18,7 +18,8 @@ interface InviteRepository : JpaRepository<Invite, Long> {
     """,
         nativeQuery = true
     )
-    fun getInvitePeople(eventId: Int): List<String>?
+    fun getEventPeople(eventId: Int): List<String>?
+
 
     fun getInviteByUser_IdAndEvent_Id(userId: Int, eventId: Int): Invite?
 
