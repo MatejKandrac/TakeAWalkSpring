@@ -49,12 +49,12 @@ class EventService {
             resultEvents.add(
                 EventObj(
                     name = event!!.name!!,
-                    owner = event!!.user!!.username!!,
-                    start = event!!.start!!,
+                    owner = event.user!!.username!!,
+                    start = event.start!!,
                     end = event.endDate,
                     peopleGoing = null,
                     places = event.locations!!.size,
-                    eventId = event!!.id!!
+                    eventId = event.id!!
                 )
             )
         }
@@ -75,7 +75,7 @@ class EventService {
                     end = event.endDate,
                     peopleGoing = null,
                     places = event.locations!!.size,
-                    eventId = event!!.id!!
+                    eventId = event.id!!
                 )
             )
         }
@@ -88,7 +88,7 @@ class EventService {
 
         return EventTimeDetailObj(
             start = event!!.start,
-            end = event!!.endDate
+            end = event.endDate
         )
     }
 

@@ -43,7 +43,6 @@ class PictureService {
     }
 
     fun deleteEventImage(eventId: Int, pictureId: Int): Boolean {
-        val event = eventRepository.findEventById(eventId) ?: return false
         val picture = pictureRepository.findPictureById(pictureId) ?: return false
         picture.deleted = true
         pictureRepository.save(picture)
