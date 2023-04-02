@@ -8,7 +8,7 @@ import java.sql.Timestamp
 class Message(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null,
 
     var message: String? = null,

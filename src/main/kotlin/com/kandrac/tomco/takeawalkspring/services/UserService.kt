@@ -1,6 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.services
 
 import com.kandrac.tomco.takeawalkspring.entities.User
+import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
 import com.kandrac.tomco.takeawalkspring.Dto.RegisterDto
@@ -40,6 +41,22 @@ class UserService {
             bio = user.bio,
             profilePicture = user.picture
         )
+    }
+
+    fun updateUserProfile(userId: Int, data: ProfileEditData) : Boolean {
+        val user: User = userRepository.findUserById(userId) ?: return false
+        user.username = data.username ?: user.username
+        user.password = data.password ?: user.password
+        user.bio = data.bio ?: user.bio
+        userRepository.save(user)
+        return true
+    }
+
+    fun updateUserProfileImage(userId: Int, bytes: ByteArray): Boolean {
+        print(bytes)
+//        val user: User = userRepository.findUserById(userId) ?: return false
+        // TODO upload to firebase storage
+        return true
     }
 
     fun getUserByEmail(email: String): User? {
