@@ -7,6 +7,7 @@ import com.kandrac.tomco.takeawalkspring.entities.User
 import com.kandrac.tomco.takeawalkspring.security.JwtTokenUtil
 import com.kandrac.tomco.takeawalkspring.services.RefreshTokenService
 import com.kandrac.tomco.takeawalkspring.services.UserService
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -39,9 +40,12 @@ class LoginController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User with given email already exists")
         }
 
-        val userId = userService.saveUser(credentials)
+        val user = userService.saveUser(credentials)
 
-        return jwtTokenUtil.generateToken(credentials.username, userId.toString())
+        val jwtToken = jwtTokenUtil.generateToken(credentials.username, user.id.toString())
+        val refreshToken = refreshTokenService.createToken(user)
+
+        return JwtResponseDto(jwtToken, refreshToken)
     }
 
     @PostMapping(value = ["auth/refresh"])

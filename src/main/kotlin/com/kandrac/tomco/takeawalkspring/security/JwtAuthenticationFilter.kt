@@ -45,6 +45,7 @@ class JwtAuthenticationFilter(
         val refreshToken = refreshTokenService.createToken(user!!)
         res.addHeader("Authorization", token)
         res.addHeader("Access-Control-Expose-Headers", "Authorization")
+        res.contentType = "application/json"
         res.writer.write(ObjectMapper().writeValueAsString(JwtResponseDto(token, refreshToken)))
     }
 

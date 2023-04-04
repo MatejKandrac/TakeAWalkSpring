@@ -19,7 +19,7 @@ class UserService {
     lateinit var passwordEncoder: BCryptPasswordEncoder
 
 
-    fun saveUser(credentials: RegisterDto): Int {
+    fun saveUser(credentials: RegisterDto): User {
         val newUser = User(
             username = credentials.username,
             email = credentials.email,
@@ -30,7 +30,7 @@ class UserService {
         )
 
         val dbUser = userRepository.save(newUser)
-        return dbUser.id!!
+        return dbUser
     }
 
     fun getUserProfile(userId: Int): ProfileObj? {
