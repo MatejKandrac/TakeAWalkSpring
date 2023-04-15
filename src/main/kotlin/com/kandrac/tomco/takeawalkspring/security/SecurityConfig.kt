@@ -46,7 +46,6 @@ class SecurityConfig(
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .addFilter(jwtAuthenticationFilter(authenticationManager, userRepository, refreshTokenService))
             .addFilter(JwtAuthorizationFilter(jwtToken, userDetailsService, authenticationManager))
-
         return http.build()
     }
 
