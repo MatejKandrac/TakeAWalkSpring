@@ -6,6 +6,8 @@ import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
 import com.kandrac.tomco.takeawalkspring.Dto.RegisterDto
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Example
+import org.springframework.data.domain.ExampleMatcher
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -18,6 +20,9 @@ class UserService {
     @Autowired
     lateinit var passwordEncoder: BCryptPasswordEncoder
 
+    private val SEARCH_CONDITIONS_MATCH_ANY = ExampleMatcher
+            .matching()
+            .withMatcher("username", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
 
     fun saveUser(credentials: RegisterDto): User {
         val newUser = User(
@@ -36,6 +41,7 @@ class UserService {
     fun getUserProfile(userId: Int): ProfileObj? {
         val user: User = userRepository.findUserById(userId) ?: return null
         return ProfileObj(
+            id = user.id!!,
             userName = user.username!!,
             email = user.email!!,
             bio = user.bio,
@@ -52,6 +58,13 @@ class UserService {
         return true
     }
 
+    fun setUserDeviceToken(userId: Int, token: String):Boolean {
+        val user = userRepository.findUserById(userId) ?: return false
+        user.deviceToken = token
+        userRepository.save(user)
+        return true
+    }
+
     fun updateUserProfileImage(userId: Int, bytes: ByteArray): Boolean {
         print(bytes)
 //        val user: User = userRepository.findUserById(userId) ?: return false
@@ -61,6 +74,16 @@ class UserService {
 
     fun getUserByEmail(email: String): User? {
         return userRepository.findUserByEmail(email)
+    }
+
+    fun searchForUser(username: String): List<ProfileObj> {
+        val example: Example<User> = Example.of(User(username=username), SEARCH_CONDITIONS_MATCH_ANY)
+        val list = userRepository.findAll(example)
+        val response = mutableListOf<ProfileObj>()
+        for (user in list) {
+            response.add(ProfileObj(user.id!!, user.username!!, user.email!!, user.bio, user.picture))
+        }
+        return response
     }
 
 }
