@@ -1,5 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.services
 
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.MulticastMessage
 import com.kandrac.tomco.takeawalkspring.entities.Event
 import com.kandrac.tomco.takeawalkspring.entities.Invite
 import com.kandrac.tomco.takeawalkspring.entities.Location
@@ -12,6 +14,7 @@ import com.kandrac.tomco.takeawalkspring.repositories.InviteRepository
 import com.kandrac.tomco.takeawalkspring.repositories.LocationRepository
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.MapEventObj
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -29,6 +32,8 @@ class EventService {
 
     @Autowired
     lateinit var userRepository: UserRepository
+
+    private val logger = LoggerFactory.getLogger(EventService::class.java)
 
     fun getEventOwner(eventId: Int): String? {
         val event: Event = eventRepository.findEventById(eventId) ?: return null
@@ -121,16 +126,39 @@ class EventService {
                 )
             )
         }
+        val tokens = mutableListOf<String>()
 
         data.users.forEach {
             val inviteUser = userRepository.findUserById(it)
-            inviteRepository.save(Invite(
-                event = event,
-                user = inviteUser,
-                status = Status.PENDING
-            ))
+            if (inviteUser != null) {
+                val token = inviteUser.deviceToken
+                if (token != null) {
+                    tokens.add(token)
+                }
+                inviteRepository.save(Invite(
+                    event = event,
+                    user = inviteUser,
+                    status = Status.PENDING
+                ))
+
+            }
         }
 
+        if (tokens.isNotEmpty()) {
+            val message = MulticastMessage
+                    .builder()
+                    .putAllData(mapOf(
+                            "notification_title" to "New invitation",
+                            "notification_content" to "${user.username} invited you to ${event.name}",
+                            "event_id" to "${event.id}"
+                    ))
+                    .addAllTokens(tokens)
+                    .build()
+
+            val response = FirebaseMessaging.getInstance().sendMulticast(message)
+
+            logger.info("${response.successCount} were sent successfully")
+        }
         return event.id
     }
 

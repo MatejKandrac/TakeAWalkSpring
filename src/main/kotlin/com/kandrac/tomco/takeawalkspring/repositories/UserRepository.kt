@@ -11,4 +11,6 @@ interface UserRepository : JpaRepository<User, Long> {
 
     fun findUserByEmail(email: String?): User?
 
+    fun searchUsersByUsername(username: String): List<User>
+
 }

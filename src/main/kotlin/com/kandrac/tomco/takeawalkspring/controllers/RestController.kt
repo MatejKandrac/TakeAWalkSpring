@@ -1,26 +1,20 @@
 package com.kandrac.tomco.takeawalkspring.controllers
 
-import com.kandrac.tomco.takeawalkspring.responseEntities.EventData
-import com.kandrac.tomco.takeawalkspring.responseEntities.EventObj
-import com.kandrac.tomco.takeawalkspring.entities.Picture
 import com.kandrac.tomco.takeawalkspring.payloadEntities.CreateEventData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
-import com.kandrac.tomco.takeawalkspring.responseEntities.MapEventObj
-import com.kandrac.tomco.takeawalkspring.responseEntities.MessageObj
-import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
+import com.kandrac.tomco.takeawalkspring.responseEntities.*
 import com.kandrac.tomco.takeawalkspring.security.UserSecurity
 import com.kandrac.tomco.takeawalkspring.services.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.data.domain.ExampleMatcher
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+
 
 @RestController
 @RequestMapping(value = ["/v1"])
@@ -42,8 +36,6 @@ class RestController {
 
     @Autowired
     lateinit var pictureService: PictureService
-
-
 //    Invitations and MyEvents
 
     @GetMapping(value = ["/events/{user-id}/invitations"])
@@ -135,6 +127,12 @@ class RestController {
                 ResponseEntity.badRequest().body("User not found")
     }
 
+//    Search
+    @GetMapping(value = ["/user/search"])
+    fun searchForUser(@RequestParam("username") username: String): List<ProfileObj> {
+        return userService.searchForUser(username);
+    }
+
     //    Chat
     @GetMapping(value = ["/chat/{event-id}/messages"])
     fun getEventMessages(@PathVariable("event-id") eventId: Int): List<MessageObj>? {
@@ -213,6 +211,17 @@ class RestController {
         @RequestParam limit: Int?
     ) : List<MapEventObj>? {
         return eventService.getMapLocations(userId, limit ?: 5)
+    }
+
+//    TOKEN
+    @PostMapping(value = ["user/{user-id}/device-token"])
+    fun setToken(
+        @PathVariable("user-id") userId: Int,
+        @RequestBody data: Map<String, Any>
+    ) : ResponseEntity<String> {
+    if (!data.containsKey("deviceToken")) return ResponseEntity.badRequest().body("No token provided")
+    return if (userService.setUserDeviceToken(userId, data["deviceToken"]!! as String))
+        ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
     }
 
 }
