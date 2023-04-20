@@ -1,5 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.entities
 
-enum class Status{
-    ACCEPTED, DECLINED, PENDING;
+enum class Status(val value: String){
+    ACCEPTED("ACCEPTED"),
+    DECLINED("DECLINED"),
+    PENDING("PENDING");
 }

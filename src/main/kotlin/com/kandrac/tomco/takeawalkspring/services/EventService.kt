@@ -138,7 +138,7 @@ class EventService {
                 inviteRepository.save(Invite(
                     event = event,
                     user = inviteUser,
-                    status = Status.PENDING
+                    status = Status.PENDING.value
                 ))
 
             }

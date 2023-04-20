@@ -20,9 +20,6 @@ import org.springframework.web.bind.annotation.RestController
 class LoginController {
 
     @Autowired
-    lateinit var http: HttpSecurity
-
-    @Autowired
     lateinit var jwtTokenUtil: JwtTokenUtil
 
     @Autowired
