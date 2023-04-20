@@ -39,7 +39,7 @@ class LoginController {
 
         val user = userService.saveUser(credentials)
 
-        val jwtToken = jwtTokenUtil.generateToken(credentials.username, user.id.toString())
+        val jwtToken = jwtTokenUtil.generateToken(credentials.email, user.id.toString())
         val refreshToken = refreshTokenService.createToken(user)
 
         return JwtResponseDto(jwtToken, refreshToken)
