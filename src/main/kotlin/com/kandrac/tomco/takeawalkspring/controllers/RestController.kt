@@ -9,6 +9,7 @@ import com.kandrac.tomco.takeawalkspring.services.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.ExampleMatcher
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
@@ -222,6 +223,15 @@ class RestController {
     if (!data.containsKey("deviceToken")) return ResponseEntity.badRequest().body("No token provided")
     return if (userService.setUserDeviceToken(userId, data["deviceToken"]!! as String))
         ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
+
+    @GetMapping(value = ["picture/{picture_link}"])
+    fun getPicture(
+            @PathVariable("picture_link") link: String
+    ) : ResponseEntity<ByteArray> {
+        val mediaType = if(link.endsWith(".jpg") || link.endsWith(".jpeg"))
+            MediaType.IMAGE_JPEG else MediaType.IMAGE_PNG
+        return ResponseEntity.ok().contentType(mediaType).body(pictureService.getPicture(link))
     }
 
 }

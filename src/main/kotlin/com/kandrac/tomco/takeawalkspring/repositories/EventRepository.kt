@@ -38,4 +38,14 @@ interface EventRepository : JpaRepository<Event, Long> {
     )
     fun getAllUserInvites(userId: Int): List<Event>?
 
+    @Query(
+            """
+                select count(*)
+                from pictures p
+                where p.event_id = :eventId ;
+            """,
+            nativeQuery = true
+    )
+    fun getLastPictureIndex(eventId: Int) : Int
+
 }

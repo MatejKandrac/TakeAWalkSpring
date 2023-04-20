@@ -1,5 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.services
 
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.MulticastMessage
 import com.kandrac.tomco.takeawalkspring.entities.Message
 import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
 import com.kandrac.tomco.takeawalkspring.repositories.EventRepository
@@ -49,7 +51,6 @@ class MessageService {
             sent = Timestamp(System.currentTimeMillis())
         )
         messageRepository.save(newMessage)
-        // TODO send notification
         return true
     }
 
