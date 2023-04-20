@@ -14,7 +14,7 @@ interface InviteRepository : JpaRepository<Invite, Long> {
         from invites i
         join users u on u.id = i.user_id
         join events e on e.id = i.event_id
-        where e.id = :eventId and i.status = 'Accepted';
+        where e.id = :eventId and i.status = 'ACCEPTED';
     """,
         nativeQuery = true
     )
@@ -22,5 +22,7 @@ interface InviteRepository : JpaRepository<Invite, Long> {
 
 
     fun getInviteByUser_IdAndEvent_Id(userId: Int, eventId: Int): Invite?
+
+    fun getInviteByUser_IdAndEvent_IdAndAndStatus(userId: Int, eventId: Int, status: String): Invite?
 
 }

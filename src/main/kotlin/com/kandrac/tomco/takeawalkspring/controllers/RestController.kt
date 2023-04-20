@@ -63,6 +63,19 @@ class RestController {
         return ResponseEntity.ok(events)
     }
 
+    //    Accept & Decline
+
+    @PutMapping(value = ["/events/{user-id}/accept"])
+    fun acceptInvite(@PathVariable("user-id") userId: Int, @RequestParam("event-id") eventId: Int): ResponseEntity<Int> {
+        val inviteId = inviteService.acceptUserInvite(userId, eventId)
+        return ResponseEntity.ok(inviteId)
+    }
+
+    @PutMapping(value = ["/events/{user-id}/decline"])
+    fun declineInvite(@PathVariable("user-id") userId: Int, @RequestParam("event-id") eventId: Int): ResponseEntity<Int> {
+        val inviteId = inviteService.declineUserInvite(userId, eventId)
+        return ResponseEntity.ok(inviteId)
+    }
 
     //    Event Detail
     @GetMapping(value = ["/event/{event-id}/host"])

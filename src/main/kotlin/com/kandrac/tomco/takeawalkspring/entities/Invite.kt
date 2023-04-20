@@ -11,9 +11,9 @@ class Invite(
     @Column(nullable = false)
     var id: Int? = null,
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    var status: Status? = null,
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "status")
+    var status: String? = null,
 
 
     @ManyToOne(cascade = [CascadeType.ALL])
