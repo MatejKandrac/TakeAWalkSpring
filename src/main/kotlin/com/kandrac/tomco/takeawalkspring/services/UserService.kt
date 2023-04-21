@@ -1,15 +1,18 @@
 package com.kandrac.tomco.takeawalkspring.services
 
+import com.google.firebase.cloud.StorageClient
 import com.kandrac.tomco.takeawalkspring.entities.User
 import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
 import com.kandrac.tomco.takeawalkspring.Dto.RegisterDto
+import com.kandrac.tomco.takeawalkspring.responseEntities.SearchPersonObj
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 class UserService {
@@ -19,10 +22,6 @@ class UserService {
 
     @Autowired
     lateinit var passwordEncoder: BCryptPasswordEncoder
-
-    private val SEARCH_CONDITIONS_MATCH_ANY = ExampleMatcher
-            .matching()
-            .withMatcher("username", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
 
     fun saveUser(credentials: RegisterDto): User {
         val newUser = User(
@@ -65,10 +64,19 @@ class UserService {
         return true
     }
 
-    fun updateUserProfileImage(userId: Int, bytes: ByteArray): Boolean {
-        print(bytes)
-//        val user: User = userRepository.findUserById(userId) ?: return false
-        // TODO upload to firebase storage
+    fun updateUserProfileImage(userId: Int, file: MultipartFile): Boolean {
+        val user: User = userRepository.findUserById(userId) ?: return false
+
+        val extension = file.originalFilename?.split(".")?.last() ?: return false
+        val objectName = "profile_${user.id}.${extension}"
+        val bucket = StorageClient.getInstance().bucket()
+        if (user.picture != null) {
+            bucket.storage.delete(objectName)
+        }
+        bucket.create(objectName, file.inputStream, file.contentType)
+
+        user.picture = objectName
+        userRepository.save(user)
         return true
     }
 
@@ -76,12 +84,22 @@ class UserService {
         return userRepository.findUserByEmail(email)
     }
 
-    fun searchForUser(username: String): List<ProfileObj> {
-        val example: Example<User> = Example.of(User(username=username), SEARCH_CONDITIONS_MATCH_ANY)
+    fun getUserByUsername(username: String) : User? {
+        return userRepository.findUserByUsername(username)
+    }
+
+    fun searchForUser(userId: Int, username: String): List<SearchPersonObj> {
+        val searchCondition = ExampleMatcher
+                .matching()
+                .withMatcher("username", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
+        val example: Example<User> = Example.of(User(username=username), searchCondition)
         val list = userRepository.findAll(example)
-        val response = mutableListOf<ProfileObj>()
-        for (user in list) {
-            response.add(ProfileObj(user.id!!, user.username!!, user.email!!, user.bio, user.picture))
+        val filtered = list.filter {
+            it.id!! != userId
+        }
+        val response = mutableListOf<SearchPersonObj>()
+        for (user in filtered) {
+            response.add(SearchPersonObj(user.id!!, user.username!!, user.bio, user.picture))
         }
         return response
     }

@@ -13,7 +13,7 @@ CREATE TABLE users
     picture      TEXT   NULL,
     email        TEXT   NOT NULL,
     "password"   TEXT   NOT NULL,
-    username     TEXT   NOT NULL,
+    username     TEXT   NOT NULL UNIQUE ,
     bio          TEXT   NULL,
     device_token TEXT   NULL
 );
@@ -53,7 +53,6 @@ CREATE TABLE locations
     "name"           TEXT             NOT NULL,
     latitude         DOUBLE PRECISION NOT NULL,
     longitude        DOUBLE PRECISION NOT NULL,
-    visited          BOOL             NOT NULL DEFAULT false,
     "location_order" INT              NOT NULL,
     CONSTRAINT locations_event FOREIGN KEY (event_id) REFERENCES events (id)
 );

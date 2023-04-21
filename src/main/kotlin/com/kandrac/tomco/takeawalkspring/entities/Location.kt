@@ -15,12 +15,9 @@ class Location(
     @Column(name = "location_order")
     var locationOrder: Int? = null,
 
-    var visited: Boolean? = null,
-
     var latitude: Double? = null,
 
     var longitude: Double? = null,
-
 
     @ManyToOne()
     @JoinColumn(name = "event_id")

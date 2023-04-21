@@ -3,6 +3,7 @@ package com.kandrac.tomco.takeawalkspring.controllers
 import com.kandrac.tomco.takeawalkspring.payloadEntities.CreateEventData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
+import com.kandrac.tomco.takeawalkspring.payloadEntities.WeatherData
 import com.kandrac.tomco.takeawalkspring.responseEntities.*
 import com.kandrac.tomco.takeawalkspring.security.UserSecurity
 import com.kandrac.tomco.takeawalkspring.services.*
@@ -36,6 +37,9 @@ class RestController {
 
     @Autowired
     lateinit var pictureService: PictureService
+
+    @Autowired
+    lateinit var weatherService: WeatherService
 //    Invitations and MyEvents
 
     @GetMapping(value = ["/events/{user-id}/invitations"])
@@ -146,15 +150,17 @@ class RestController {
 
     @PutMapping(value = ["/user/{user-id}/profile-picture"])
     fun editUserProfile(@PathVariable("user-id") userId: Int, file: MultipartFile): ResponseEntity<String> {
-        return if (userService.updateUserProfileImage(userId, file.bytes))
+        return if (userService.updateUserProfileImage(userId, file))
             ResponseEntity.ok("Success") else
             ResponseEntity.badRequest().body("User not found")
     }
 
     //    Search
-    @GetMapping(value = ["/user/search"])
-    fun searchForUser(@RequestParam("username") username: String): ResponseEntity<List<ProfileObj>> {
-        val profiles = userService.searchForUser(username);
+    @GetMapping(value = ["/user/{user_id}/search"])
+    fun searchForUser(
+            @PathVariable("user_id") userId: Int,
+            @RequestParam("username") username: String): ResponseEntity<List<SearchPersonObj>> {
+        val profiles = userService.searchForUser(userId, username)
         return ResponseEntity.ok(profiles)
     }
 
@@ -214,15 +220,11 @@ class RestController {
     }
 
 
-    //TODO event not needed here
-    @PutMapping(value = ["event/{event-id}/location-status"])
+    @PutMapping(value = ["event/{event-id}/next-location"])
     fun updateLocationStatus(
-        @PathVariable("event-id") eventId: Int,
-        @RequestBody data: Map<String, Any>
+        @PathVariable("event-id") eventId: Int
     ): ResponseEntity<String> {
-        if (!data.containsKey("location_id")) return ResponseEntity.badRequest().body("No description id provided")
-        return if (locationService.updateLocation(eventId, data["location_id"]!! as Int))
-            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+        return eventService.setNextLocation(eventId)
     }
 
     @PostMapping(value = ["event"])
@@ -232,6 +234,14 @@ class RestController {
         val eventId = eventService.createEvent(data)
 //        return ResponseEntity.ok(eventId)
         return ResponseEntity.status(HttpStatus.CREATED).body(eventId)
+    }
+
+    @DeleteMapping(value = ["event/{event-id}"])
+    fun deleteEvent(
+            @PathVariable("event-id") eventId: Int
+    ): ResponseEntity<Int?> {
+        val deleteId = eventService.deleteEvent(eventId)
+        return ResponseEntity.ok(deleteId)
     }
 
     //    Map
@@ -262,6 +272,13 @@ class RestController {
         val mediaType = if(link.endsWith(".jpg") || link.endsWith(".jpeg"))
             MediaType.IMAGE_JPEG else MediaType.IMAGE_PNG
         return ResponseEntity.ok().contentType(mediaType).body(pictureService.getPicture(link))
+    }
+
+    @GetMapping(value = ["weather"])
+    fun getWeather(
+            @RequestBody() data: WeatherData
+    ) : ResponseEntity<List<WeatherObj>>? {
+        return weatherService.getWeatherData(data.lat, data.lon, data.date)
     }
 
 }

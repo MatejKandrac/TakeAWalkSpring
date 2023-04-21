@@ -31,10 +31,16 @@ class LoginController {
 
     @PostMapping(value = ["auth/register"])
     fun register(@RequestBody credentials: RegisterDto): Any? {
-        val dbUser: User? = userService.getUserByEmail(credentials.email)
+        var dbUser: User? = userService.getUserByEmail(credentials.email)
 
         if (dbUser != null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User with given email already exists")
+        }
+
+        dbUser = userService.getUserByUsername(credentials.username)
+
+        if (dbUser != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User with given username already exists")
         }
 
         val user = userService.saveUser(credentials)

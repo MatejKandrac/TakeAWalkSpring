@@ -22,7 +22,6 @@ class LocationService {
                     latitude = location.latitude,
                     longitude = location.longitude,
                     order = location.locationOrder,
-                    visited = location.visited
                 )
             )
         }
@@ -30,10 +29,4 @@ class LocationService {
         return locationObjects
     }
 
-    fun updateLocation(eventId: Int, id: Int): Boolean {
-        val location = locationRepository.findLocationById(id) ?: return false
-        location.visited = true
-        locationRepository.save(location)
-        return true
-    }
 }

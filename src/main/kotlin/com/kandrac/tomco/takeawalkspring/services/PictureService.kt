@@ -35,7 +35,7 @@ class PictureService {
         val event = eventRepository.findEventById(eventId) ?: return false
         val index = eventRepository.getLastPictureIndex(eventId)
         val extension = file.originalFilename?.split(".")?.last() ?: return false
-        val objectName = "${event.name}_${index + 1}.${extension}"
+        val objectName = "event_${event.id}_${index + 1}.${extension}"
         val newPicture = Picture(
             event = event,
             link = objectName

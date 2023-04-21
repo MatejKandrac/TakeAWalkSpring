@@ -48,4 +48,14 @@ interface EventRepository : JpaRepository<Event, Long> {
     )
     fun getLastPictureIndex(eventId: Int) : Int
 
+    @Query(
+            """
+                select u.device_token
+                from users u
+                join invites i on u.id = i.user_id
+                where i.event_id = :eventId and u.device_token is not null;
+            """,
+            nativeQuery = true
+    )
+    fun getDeviceTokensForEvent(eventId: Int) : List<String>
 }

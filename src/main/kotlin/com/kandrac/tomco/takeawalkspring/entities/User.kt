@@ -17,6 +17,7 @@ class User(
 
     var password: String? = null,
 
+    @Column(name = "username", unique = true)
     var username: String? = null,
 
     var bio: String? = null,

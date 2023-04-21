@@ -16,6 +16,7 @@ import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.MapEventObj
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
@@ -120,7 +121,6 @@ class EventService {
                     name = it.name,
                     latitude = it.lat,
                     longitude = it.lon,
-                    visited = false,
                     locationOrder = it.order,
                     event = event
                 )
@@ -157,7 +157,7 @@ class EventService {
 
             val response = FirebaseMessaging.getInstance().sendMulticast(message)
 
-            logger.info("${response.successCount} were sent successfully")
+            logger.info("${response.successCount} notifications were sent successfully")
         }
         return event.id
     }
@@ -182,4 +182,34 @@ class EventService {
         return result
     }
 
+    fun deleteEvent(eventId: Int): Int? {
+        val event = eventRepository.findEventById(eventId) ?: return null
+        event.cancelled = true
+        eventRepository.save(event)
+
+        val tokens = eventRepository.getDeviceTokensForEvent(eventId)
+
+        if (tokens.isNotEmpty()) {
+            val message = MulticastMessage
+                    .builder()
+                    .putAllData(mapOf(
+                            "notification_title" to "${event.name}",
+                            "notification_content" to "Event has been cancelled",
+                            "event_id" to "$eventId"
+                    ))
+                    .addAllTokens(tokens)
+                    .build()
+            val successCount = FirebaseMessaging.getInstance().sendMulticast(message)
+            logger.info("${successCount.successCount} notifications were sent successfully")
+        }
+        return event.id
+    }
+
+    fun setNextLocation(eventId: Int): ResponseEntity<String> {
+        val event = eventRepository.findEventById(eventId) ?: return ResponseEntity.badRequest().body("Event does not exist")
+        event.actualLocation++
+        if (event.actualLocation == event.locations!!.size) return ResponseEntity.badRequest().body("Exceeded number of locations")
+        eventRepository.save(event)
+        return ResponseEntity.ok("")
+    }
 }
