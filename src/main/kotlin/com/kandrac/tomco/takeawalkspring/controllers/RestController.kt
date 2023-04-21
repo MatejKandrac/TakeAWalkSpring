@@ -149,7 +149,9 @@ class RestController {
     }
 
     @PutMapping(value = ["/user/{user-id}/profile-picture"])
-    fun editUserProfile(@PathVariable("user-id") userId: Int, file: MultipartFile): ResponseEntity<String> {
+    fun editUserPicture(
+            @PathVariable("user-id") userId: Int,
+            @RequestBody file: MultipartFile): ResponseEntity<String> {
         return if (userService.updateUserProfileImage(userId, file))
             ResponseEntity.ok("Success") else
             ResponseEntity.badRequest().body("User not found")
@@ -191,7 +193,7 @@ class RestController {
     @PostMapping(value = ["event/{event-id}/picture"])
     fun postEventPicture(
         @PathVariable("event-id") eventId: Int,
-        file: MultipartFile
+        @RequestBody file: MultipartFile
     ): ResponseEntity<String> {
         return if (pictureService.postEventPicture(eventId, file))
             ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
