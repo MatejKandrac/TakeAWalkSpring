@@ -279,8 +279,8 @@ class RestController {
     @GetMapping(value = ["weather"])
     fun getWeather(
             @RequestBody() data: WeatherData
-    ) : ResponseEntity<List<WeatherObj>>? {
-        return weatherService.getWeatherData(data.lat, data.lon, data.date)
+    ) : ResponseEntity<List<WeatherDateObj>>? {
+        return weatherService.getWeatherData(data.lat, data.lon, data.dateStart, data.dateEnd)
     }
 
 }

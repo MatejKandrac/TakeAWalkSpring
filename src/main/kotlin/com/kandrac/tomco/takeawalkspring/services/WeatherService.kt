@@ -1,10 +1,14 @@
 package com.kandrac.tomco.takeawalkspring.services
 
-import com.kandrac.tomco.takeawalkspring.responseEntities.WeatherObj
+import com.kandrac.tomco.takeawalkspring.responseEntities.WeatherDateObj
+import com.kandrac.tomco.takeawalkspring.weather.WeatherRemoteError
 import com.kandrac.tomco.takeawalkspring.weather.WeatherRemoteResponse
+import org.slf4j.LoggerFactory
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @Service
@@ -12,29 +16,62 @@ class WeatherService(restTemplate: RestTemplateBuilder) {
 
     private final val restTemplateBuilder: RestTemplate
 
+    private val logger = LoggerFactory.getLogger(WeatherService::class.java)
+
     init {
         this.restTemplateBuilder = restTemplate.build()
     }
 
-    fun getWeatherData(lat: Double, lon: Double, date: String) : ResponseEntity<List<WeatherObj>>? {
-        val url = "https://api.open-meteo.com/v1/forecast?" +
+    fun getWeatherData(lat: Double, lon: Double, dateStart: String, dateEnd: String) : ResponseEntity<List<WeatherDateObj>>? {
+        var url = "https://api.open-meteo.com/v1/forecast?" +
                 "latitude=${lat}" +
                 "&longitude=${lon}" +
-                "&start_date=$date" +
-                "&end_date=$date" +
+                "&start_date=$dateStart" +
+                "&end_date=$dateEnd" +
                 "&hourly=weathercode" +
                 "&timezone=UTC"
-        val data : ResponseEntity<WeatherRemoteResponse>
+        var data : ResponseEntity<WeatherRemoteResponse>? = null
         try {
             data = restTemplateBuilder.getForEntity(url, WeatherRemoteResponse::class.java)
-        } catch (e: Exception) {
-            return ResponseEntity.badRequest().build()
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode == HttpStatusCode.valueOf(400)) {
+                try {
+                    val responseData = e.getResponseBodyAs(WeatherRemoteError::class.java)
+                    val newDate = responseData!!.reason.split(" to ")[1]
+                    logger.info("Weather request out of range, attempting $newDate as end date")
+                    url = "https://api.open-meteo.com/v1/forecast?" +
+                            "latitude=${lat}" +
+                            "&longitude=${lon}" +
+                            "&start_date=$dateStart" +
+                            "&end_date=$newDate" +
+                            "&hourly=weathercode" +
+                            "&timezone=UTC"
+                    data = restTemplateBuilder.getForEntity(url, WeatherRemoteResponse::class.java)
+                } catch (e: Exception) {
+                    logger.error(e.message)
+                    return ResponseEntity.badRequest().build()
+                }
+            }
         }
-        val responseData = mutableListOf<WeatherObj>()
-        val hourlyData = data.body!!.hourly;
+        val responseData = mutableListOf<WeatherDateObj>()
+        val hourlyData = data?.body!!.hourly
+
+        var currentObj = WeatherDateObj(dateStart, mutableMapOf())
+
         for (i in 0 until hourlyData.time.size) {
-            responseData.add(WeatherObj(hourlyData.time[i], getWeatherText(hourlyData.weathercode[i])))
+            val dateData = hourlyData.time[i].split("T")
+
+            if (dateData[0] != currentObj.date) {
+                if (currentObj.data.isNotEmpty()) {
+                    responseData.add(currentObj)
+                }
+
+                currentObj = WeatherDateObj(dateData[0], mutableMapOf())
+            }
+
+            currentObj.data.put(dateData[1], getWeatherText(hourlyData.weathercode[i]))
         }
+        responseData.add(currentObj)
         return ResponseEntity.ok(responseData)
     }
 
