@@ -7,7 +7,10 @@ import com.kandrac.tomco.takeawalkspring.repositories.MessageRepository
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.MessageObj
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import java.awt.print.Pageable
 import java.sql.Timestamp
 
 @Service
@@ -23,6 +26,10 @@ class MessageService {
     lateinit var userRepository: UserRepository
 
     fun getEventMessages(eventId: Int): List<MessageObj>? {
+
+//        val page = PageRequest.of(1, 2)
+
+//        val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId, page) ?: return null
         val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId) ?: return null
         val resultMessages = mutableListOf<MessageObj>()
 
@@ -32,6 +39,7 @@ class MessageService {
                 message = msg.message!!,
                 sent = msg.sent!!,
                 userName = msg.user!!.username!!,
+                userId = msg.user!!.id!!,
                 profilePicture = msg.user!!.picture
             ))
         }
@@ -51,6 +59,10 @@ class MessageService {
         messageRepository.save(newMessage)
         // TODO send notification
         return true
+    }
+
+    fun getDeviceTokens(eventId: Int): List<String> {
+        return messageRepository.getDeviceTokens(eventId)
     }
 
 }

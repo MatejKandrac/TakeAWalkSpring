@@ -14,7 +14,7 @@ class Picture(
 
     var deleted: Boolean = false,
 
-    @ManyToOne(cascade = [CascadeType.REMOVE])
+    @ManyToOne(cascade = [CascadeType.REFRESH])
     @JoinColumn(name = "event_id")
     var event: Event? = null
 

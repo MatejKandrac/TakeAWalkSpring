@@ -7,5 +7,6 @@ data class MessageObj(
     val message: String,
     val sent: Timestamp,
     val userName: String,
+    val userId: Int,
     val profilePicture: String?
 )
