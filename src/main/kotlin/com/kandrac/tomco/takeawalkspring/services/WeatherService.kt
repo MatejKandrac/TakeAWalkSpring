@@ -29,7 +29,7 @@ class WeatherService(restTemplate: RestTemplateBuilder) {
                 "&start_date=$dateStart" +
                 "&end_date=$dateEnd" +
                 "&hourly=weathercode" +
-                "&timezone=UTC"
+                "&timezone=CET"
         var data : ResponseEntity<WeatherRemoteResponse>? = null
         try {
             data = restTemplateBuilder.getForEntity(url, WeatherRemoteResponse::class.java)
@@ -45,7 +45,7 @@ class WeatherService(restTemplate: RestTemplateBuilder) {
                             "&start_date=$dateStart" +
                             "&end_date=$newDate" +
                             "&hourly=weathercode" +
-                            "&timezone=UTC"
+                            "&timezone=CET"
                     data = restTemplateBuilder.getForEntity(url, WeatherRemoteResponse::class.java)
                 } catch (e: Exception) {
                     logger.error(e.message)
