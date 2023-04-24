@@ -27,13 +27,16 @@ class MessageService {
     @Autowired
     lateinit var userRepository: UserRepository
 
-    fun getEventMessages(eventId: Int): List<MessageObj>? {
+    fun getEventMessages(eventId: Int, pageNumber: Int, pageSize: Int): List<MessageObj>? {
 
-//        val page = PageRequest.of(1, 2)
+        val page = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "sent"))
 
-//        val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId, page) ?: return null
-        val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId) ?: return null
+        val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId, page)?.reversed() ?: return null
+
+//        val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId) ?: return null
         val resultMessages = mutableListOf<MessageObj>()
+
+
 
         for (msg in messages) {
             resultMessages.add(MessageObj(

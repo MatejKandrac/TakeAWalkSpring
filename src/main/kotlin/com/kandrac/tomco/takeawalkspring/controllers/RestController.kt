@@ -218,9 +218,13 @@ class RestController {
 
     //    Chat
     @GetMapping(value = ["/chat/{event-id}/messages"])
-    fun getEventMessages(@PathVariable("event-id") eventId: Int): ResponseEntity<List<MessageObj>?> {
+    fun getEventMessages(
+        @PathVariable("event-id") eventId: Int,
+        @RequestParam("page") pageNumber: Int,
+        @RequestParam("size") pageSize: Int
+    ): ResponseEntity<List<MessageObj>> {
         // TODO add pagination
-        val eventMessages = messageService.getEventMessages(eventId)
+        val eventMessages = messageService.getEventMessages(eventId, pageNumber, pageSize) ?: return ResponseEntity.ok(emptyList())
         return ResponseEntity.ok(eventMessages)
     }
 
