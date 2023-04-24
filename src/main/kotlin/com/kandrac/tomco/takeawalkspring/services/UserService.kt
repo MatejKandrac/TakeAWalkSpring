@@ -51,7 +51,8 @@ class UserService {
     fun updateUserProfile(userId: Int, data: ProfileEditData) : Boolean {
         val user: User = userRepository.findUserById(userId) ?: return false
         user.username = data.username ?: user.username
-        user.password = data.password ?: user.password
+//        user.password =  data.password ?: user.password
+        user.password =  if (data.password != null) passwordEncoder.encode(data.password) else user.password
         user.bio = data.bio ?: user.bio
         userRepository.save(user)
         return true
@@ -102,6 +103,12 @@ class UserService {
             response.add(SearchPersonObj(user.id!!, user.username!!, user.bio, user.picture))
         }
         return response
+    }
+
+    fun deleteDeviceToken(userId: Int): Int? {
+        val user = userRepository.findUserById(userId) ?: return null
+        user.deviceToken = null
+        userRepository.save(user).also { return user.id }
     }
 
 }

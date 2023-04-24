@@ -5,6 +5,7 @@ import com.kandrac.tomco.takeawalkspring.entities.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.sql.Timestamp
 
 @Repository
 interface EventRepository : JpaRepository<Event, Long> {
@@ -21,7 +22,7 @@ interface EventRepository : JpaRepository<Event, Long> {
         select e.*
         from events e
         join invites i on e.id = i.event_id
-        where i.user_id = :userId and i.status = 'Accepted';
+        where i.user_id = :userId and i.status = 'ACCEPTED';
     """,
         nativeQuery = true
     )
@@ -32,7 +33,20 @@ interface EventRepository : JpaRepository<Event, Long> {
         select e.*
         from events e
         join invites i on e.id = i.event_id
-        where i.user_id = :userId and i.status = 'Pending';
+        where i.user_id = :userId 
+        and e.end_date > :currentTime
+        and i.status = 'ACCEPTED';
+    """,
+        nativeQuery = true
+    )
+    fun getAllOngoingUserEvents(userId: Int, currentTime: Timestamp): List<Event>?
+
+    @Query(
+        """
+        select e.*
+        from events e
+        join invites i on e.id = i.event_id
+        where i.user_id = :userId and i.status = 'PENDING';
     """,
         nativeQuery = true
     )
@@ -58,4 +72,17 @@ interface EventRepository : JpaRepository<Event, Long> {
             nativeQuery = true
     )
     fun getDeviceTokensForEvent(eventId: Int) : List<String>
+    @Query(
+        """
+        select e.*
+        from events e
+        join invites i on e.id = i.event_id
+        where i.user_id = :userId 
+        and e.end_date > :currentTime
+        and i.status = 'PENDING';
+    """,
+        nativeQuery = true
+    )
+    fun getAllOngoingUserInvites(userId: Int, currentTime: Timestamp): List<Event>?
+
 }

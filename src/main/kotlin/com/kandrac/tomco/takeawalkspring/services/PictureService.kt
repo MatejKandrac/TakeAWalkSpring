@@ -61,4 +61,10 @@ class PictureService {
         pictureRepository.save(picture)
         return true
     }
+
+    fun hardDeleteEventImage(eventId: Int, pictureId: Int): Boolean {
+        val picture = pictureRepository.findPictureById(pictureId) ?: return false
+        pictureRepository.delete(picture)
+        return true
+    }
 }

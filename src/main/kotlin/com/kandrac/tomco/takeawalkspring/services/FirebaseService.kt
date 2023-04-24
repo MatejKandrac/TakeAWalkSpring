@@ -27,9 +27,6 @@ class FirebaseService {
                 .setStorageBucket(storageBucket)
                 .build()
             FirebaseApp.initializeApp(options)
-            FirebaseMessaging.getInstance().send(
-                Message.builder().putData("test", "test").setToken("c4HFHfc9TsSs4pAEyjT4gn:APA91bE-riO5f4VgWXOsqM5lY2bgixNIca5oPab4KplL9aOQ7AcmCBnGVMBCWju3lbI3Bp3gImfphReYHFq-UaAt9lwSMl9leb-05Gst0hze8_2LktU-g2ErJ5-zszu4op4YSAGxyJgc").build()
-            )
         } catch (e: Exception) {
             logger.error("FAILED TO INITIALIZE FIREBASE", e)
         }

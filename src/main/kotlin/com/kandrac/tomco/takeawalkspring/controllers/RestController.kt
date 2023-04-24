@@ -1,6 +1,7 @@
 package com.kandrac.tomco.takeawalkspring.controllers
 
 import com.kandrac.tomco.takeawalkspring.payloadEntities.CreateEventData
+import com.kandrac.tomco.takeawalkspring.payloadEntities.FilterData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.WeatherData
@@ -40,6 +41,7 @@ class RestController {
 
     @Autowired
     lateinit var weatherService: WeatherService
+
 //    Invitations and MyEvents
 
     @GetMapping(value = ["/events/{user-id}/invitations"])
@@ -48,7 +50,8 @@ class RestController {
         val invites = eventService.getAllUserInvites(userId) ?: return ResponseEntity.ok(emptyList())
 
         invites.forEach { invite ->
-            val peopleNum = inviteService.getEventPeople(invite.eventId)?.size
+//            val peopleNum = inviteService.getEventPeople(invite.eventId)?.size
+            val peopleNum = inviteService.countEventPeople(invite.eventId)
             invite.peopleGoing = peopleNum
         }
 
@@ -61,7 +64,8 @@ class RestController {
         val events = eventService.getAllUserEvents(userId) ?: return ResponseEntity.ok(emptyList())
 
         events.forEach { event ->
-            val peopleNum = inviteService.getEventPeople(event.eventId)?.size
+//            val peopleNum = inviteService.getEventPeople(event.eventId)?.size
+            val peopleNum = inviteService.countEventPeople(event.eventId)
             event.peopleGoing = peopleNum
         }
 
@@ -70,28 +74,64 @@ class RestController {
 
     //    Accept & Decline
 
-    @PutMapping(value = ["/events/{user-id}/accept"])
-    fun acceptInvite(@PathVariable("user-id") userId: Int, @RequestParam("event-id") eventId: Int): ResponseEntity<Int> {
-        val inviteId = inviteService.acceptUserInvite(userId, eventId)
+    @PutMapping(value = ["/events/{event-id}/accept"])
+    fun acceptInvite(
+        @PathVariable("event-id") eventId: Int,
+        @RequestParam("user-id") userId: Int
+    ): ResponseEntity<Int> {
+        println("EventId: ${eventId} UserId: ${userId}")
+        val inviteId = inviteService.acceptUserInvite(userId = userId.toInt(), eventId = eventId)
         return ResponseEntity.ok(inviteId)
     }
 
-    @PutMapping(value = ["/events/{user-id}/decline"])
-    fun declineInvite(@PathVariable("user-id") userId: Int, @RequestParam("event-id") eventId: Int): ResponseEntity<Int> {
+    @PutMapping(value = ["/events/{event-id}/decline"])
+    fun declineInvite(
+        @PathVariable("event-id") eventId: Int,
+        @RequestParam("user-id") userId: Int
+    ): ResponseEntity<Int> {
         val inviteId = inviteService.declineUserInvite(userId, eventId)
         return ResponseEntity.ok(inviteId)
     }
 
+
+//    Filter
+
+    @GetMapping(value = ["/events/{user-id}/my-events/filter"])
+    fun filterEvents(
+        @PathVariable("user-id") userId: Int,
+        @RequestBody filter: FilterData
+    ): ResponseEntity<List<EventObj>> {
+        val events = eventService.filterEvents(userId, filter) ?: return ResponseEntity.ok(emptyList())
+
+        return ResponseEntity.ok(events)
+    }
+
+    @GetMapping(value = ["/events/{user-id}/invitations/filter"])
+    fun filterInvitations(
+        @PathVariable("user-id") userId: Int,
+        @RequestBody filter: FilterData
+    ): ResponseEntity<List<EventObj>> {
+        val events = eventService.filterInvitations(userId, filter) ?: return ResponseEntity.ok(emptyList())
+
+        return ResponseEntity.ok(events)
+    }
+
+
     //    Event Detail
     @GetMapping(value = ["/event/{event-id}/host"])
     fun getEventOwner(@PathVariable("event-id") eventId: Int): ResponseEntity<String?> {
-        val ownerName = eventService.getEventOwner(eventId) ?: ""
-        return ResponseEntity.ok(ownerName)
+        val owner = eventService.getEventOwner(eventId) ?: return ResponseEntity.ok("")
+//        val ownerName = owner.username
+        return ResponseEntity.ok(owner.username)
     }
 
     @GetMapping(value = ["/event/{event-id}/people"])
-    fun getEventPeople(@PathVariable("event-id") eventId: Int): ResponseEntity<List<String>?> {
-        val eventPeople = inviteService.getEventPeople(eventId) ?: emptyList()
+    fun getEventPeople(
+        @PathVariable("event-id") eventId: Int,
+        @RequestParam("include-pending") includePending: Boolean
+    ): ResponseEntity<List<EventPeople>?> {
+//        val eventPeople = inviteService.getEventPeople(eventId) ?: emptyList()
+        val eventPeople = inviteService.getAllEventPeople(eventId, includePending) ?: emptyList()
         return ResponseEntity.ok(eventPeople)
     }
 
@@ -109,18 +149,23 @@ class RestController {
     }
 
     @GetMapping(value = ["/event/{event-id}/data"])
-    fun getEventData(@PathVariable("event-id") eventId: Int, auth: Authentication): ResponseEntity<EventData> {
-        val userId = (auth.principal as UserSecurity).id
+    fun getEventData(
+        @PathVariable("event-id") eventId: Int,
+        @RequestParam("user-id") userId: Int
+    ): ResponseEntity<EventData> {
+//        val userId = (auth.principal as UserSecurity).id
 
         val eventHost = eventService.getEventOwner(eventId)
         val eventPeople = inviteService.getEventPeople(eventId)
         val eventLocations = locationService.getEventLocations(eventId)
         val eventTime = eventService.getEventTimeDetail(eventId)
-        val eventStatus = inviteService.getInviteStatus(userId.toInt(), eventId)
+//        val eventStatus = inviteService.getInviteStatus(userId.toInt(), eventId)
+        val eventStatus = inviteService.getInviteStatus(userId, eventId)
 
         val eventData = EventData(
-            eventHost = eventHost!!,
-            eventPeople = eventPeople,
+            ownerId = eventHost!!.id!!,
+            eventHost = eventHost.username!!,
+//            eventPeople = eventPeople,
             eventLocations = eventLocations,
             eventTime = eventTime,
             eventStatus = eventStatus
@@ -157,6 +202,11 @@ class RestController {
             ResponseEntity.badRequest().body("User not found")
     }
 
+    @DeleteMapping(value = ["/user/{user-id}/device-token"])
+    fun deleteDeviceToken(@PathVariable("user-id") userId: Int): ResponseEntity<String> {
+        userService.deleteDeviceToken(userId).also { return ResponseEntity.ok("Success") }
+    }
+
     //    Search
     @GetMapping(value = ["/user/{user_id}/search"])
     fun searchForUser(
@@ -181,6 +231,12 @@ class RestController {
     ): ResponseEntity<String> {
         return if (messageService.addEventMessage(eventId, message))
             ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
+
+    @GetMapping(value = ["chat/{event-id}/device-tokens"])
+    fun getDeviceTokens(@PathVariable("event-id") eventId: Int): ResponseEntity<List<String?>> {
+        val deviceTokens = messageService.getDeviceTokens(eventId)
+        return ResponseEntity.ok(deviceTokens)
     }
 
     //    Event Progress
@@ -208,6 +264,16 @@ class RestController {
     ): ResponseEntity<String> {
         if (!data.containsKey("picture_id")) return ResponseEntity.badRequest().body("No picture id provided")
         return if (pictureService.deleteEventImage(eventId, data["picture_id"]!! as Int))
+            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    }
+
+    @DeleteMapping(value = ["event/{event-id}/picture/hard"])
+    fun hardDeleteEventPicture(
+        @PathVariable("event-id") eventId: Int,
+        @RequestBody data: Map<String, Any>
+    ): ResponseEntity<String> {
+        if (!data.containsKey("picture_id")) return ResponseEntity.badRequest().body("No picture id provided")
+        return if (pictureService.hardDeleteEventImage(eventId, data["picture_id"]!! as Int))
             ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
     }
 

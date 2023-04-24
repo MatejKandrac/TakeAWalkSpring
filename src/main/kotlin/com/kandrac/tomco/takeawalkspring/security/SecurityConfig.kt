@@ -39,7 +39,7 @@ class SecurityConfig(
         val authenticationManager = authManager(http)
 
         http
-            .authorizeHttpRequests().requestMatchers("/auth/***").permitAll()
+            .authorizeHttpRequests().requestMatchers("/auth/***", "/v1/**").permitAll()
             .anyRequest().authenticated().and()
             .csrf().disable()
             .authenticationManager(authenticationManager)
