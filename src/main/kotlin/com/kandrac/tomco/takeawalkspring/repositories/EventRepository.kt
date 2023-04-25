@@ -22,7 +22,8 @@ interface EventRepository : JpaRepository<Event, Long> {
         select e.*
         from events e
         join invites i on e.id = i.event_id
-        where i.user_id = :userId and i.status = 'ACCEPTED';
+        where i.user_id = :userId and i.status = 'ACCEPTED'
+        or e.owner_id = :userId ;
     """,
         nativeQuery = true
     )
@@ -33,9 +34,10 @@ interface EventRepository : JpaRepository<Event, Long> {
         select e.*
         from events e
         join invites i on e.id = i.event_id
-        where i.user_id = :userId 
+        where i.user_id = :userId
         and e.end_date > :currentTime
-        and i.status = 'ACCEPTED';
+        and i.status = 'ACCEPTED'
+        or e.owner_id = :userId ;
     """,
         nativeQuery = true
     )
@@ -67,11 +69,11 @@ interface EventRepository : JpaRepository<Event, Long> {
                 select u.device_token
                 from users u
                 join invites i on u.id = i.user_id
-                where i.event_id = :eventId and u.device_token is not null;
+                where i.event_id = :eventId and u.device_token is not null and u.id != :userId ;
             """,
             nativeQuery = true
     )
-    fun getDeviceTokensForEvent(eventId: Int) : List<String>
+    fun getDeviceTokensForEvent(userId: Int, eventId: Int) : List<String>
     @Query(
         """
         select e.*

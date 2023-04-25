@@ -193,7 +193,9 @@ class EventService {
 
 
     fun getAllUserInvites(userId: Int): List<EventObj>? {
-        val events: List<Event> = eventRepository.getAllUserInvites(userId) ?: return null
+        val currentTime = Timestamp.from(Instant.now())
+
+        val events: List<Event> = eventRepository.getAllOngoingUserInvites(userId, currentTime) ?: return null
         val resultInvites = mutableListOf<EventObj>()
 
         for (event in events) {
@@ -316,7 +318,7 @@ class EventService {
         event.cancelled = true
         eventRepository.save(event)
 
-        val tokens = eventRepository.getDeviceTokensForEvent(eventId)
+        val tokens = eventRepository.getDeviceTokensForEvent(-1, eventId)
 
         if (tokens.isNotEmpty()) {
             val message = MulticastMessage

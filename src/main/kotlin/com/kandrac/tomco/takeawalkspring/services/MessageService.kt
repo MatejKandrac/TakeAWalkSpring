@@ -8,6 +8,7 @@ import com.kandrac.tomco.takeawalkspring.repositories.EventRepository
 import com.kandrac.tomco.takeawalkspring.repositories.MessageRepository
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.MessageObj
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -26,6 +27,8 @@ class MessageService {
 
     @Autowired
     lateinit var userRepository: UserRepository
+
+    private val logger = LoggerFactory.getLogger(MessageService::class.java)
 
     fun getEventMessages(eventId: Int, pageNumber: Int, pageSize: Int): List<MessageObj>? {
 
@@ -61,7 +64,31 @@ class MessageService {
             message = message.message,
             sent = Timestamp(System.currentTimeMillis())
         )
-        messageRepository.save(newMessage)
+        val newDbMessage = messageRepository.save(newMessage)
+
+        val tokens = eventRepository.getDeviceTokensForEvent(user.id!!, eventId)
+
+        logger.info(tokens.toString())
+
+        if (tokens.isNotEmpty()) {
+            val remoteMessage = MulticastMessage
+                .builder()
+                .putAllData(mapOf(
+                    "notification_title" to "${event.name}",
+                    "notification_content" to "New message from ${user.username}",
+                    "event_id" to "$eventId",
+                    "message_username" to "${user.username}",
+                    "message_picture" to "${user.picture}",
+                    "message_userId" to "${user.id}",
+                    "message" to message.message,
+                    "message_id" to "${newDbMessage.id}",
+                    "message_sent" to "${newDbMessage.sent}"
+                ))
+                .addAllTokens(tokens)
+                .build()
+            FirebaseMessaging.getInstance().sendMulticast(remoteMessage)
+        }
+
         return true
     }
 
