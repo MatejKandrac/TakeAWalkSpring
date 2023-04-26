@@ -9,5 +9,6 @@ data class EventObj(
     val end: Timestamp?,
     var peopleGoing: Int?,
     val places: Int?,
+    val locations: List<LocationPointObj>,
     val eventId: Int
 )
