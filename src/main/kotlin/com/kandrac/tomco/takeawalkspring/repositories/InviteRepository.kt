@@ -22,7 +22,7 @@ interface InviteRepository : JpaRepository<Invite, Long> {
     fun getEventPeople(eventId: Int): List<String>?
 
     @Query(
-        """select u.username, i.status
+        """select u.username, i.status, u.picture
         from invites i
         join users u on u.id = i.user_id
         where i.event_id = :eventId and i.status = 'ACCEPTED' ;
@@ -32,7 +32,7 @@ interface InviteRepository : JpaRepository<Invite, Long> {
     fun getAcceptedEventPeople(eventId: Int): Collection<EventPeople>
 
     @Query(
-        """select u.username, i.status
+        """select u.username, i.status, u.picture
         from invites i
         join users u on u.id = i.user_id
         where i.event_id = :eventId and i.status in ('ACCEPTED', 'PENDING') ;

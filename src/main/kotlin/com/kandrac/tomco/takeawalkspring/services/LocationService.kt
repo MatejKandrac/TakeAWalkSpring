@@ -19,8 +19,8 @@ class LocationService {
             locationObjects.add(
                 LocationObj(
                     name = location.name,
-                    latitude = location.latitude,
-                    longitude = location.longitude,
+                    lat = location.latitude,
+                    lon = location.longitude,
                     order = location.locationOrder,
                 )
             )

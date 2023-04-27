@@ -87,4 +87,10 @@ interface EventRepository : JpaRepository<Event, Long> {
     )
     fun getAllOngoingUserInvites(userId: Int, currentTime: Timestamp): List<Event>?
 
+    @Query("""
+        select e.name
+        from events e
+        where id = :eventId ;
+    """, nativeQuery = true)
+    fun getEventName(eventId: Int): String?
 }

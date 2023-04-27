@@ -63,7 +63,7 @@ class EventService {
         for (event in events) {
             resultEvents.add(
                 EventObj(
-                    name = event!!.name!!,
+                    name = event.name!!,
                     owner = event.user!!.username!!,
                     start = event.start!!,
                     end = event.endDate,
@@ -153,7 +153,7 @@ class EventService {
         for (event in events) {
             resultEvents.add(
                 EventObj(
-                    name = event!!.name!!,
+                    name = event.name!!,
                     owner = event.user!!.username!!,
                     start = event.start!!,
                     end = event.endDate,
@@ -343,4 +343,5 @@ class EventService {
         eventRepository.save(event)
         return ResponseEntity.ok("")
     }
+    fun getEvent(eventId: Int): Event? = eventRepository.findEventById(eventId)
 }

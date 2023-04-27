@@ -128,7 +128,7 @@ class RestController {
     @GetMapping(value = ["/event/{event-id}/people"])
     fun getEventPeople(
         @PathVariable("event-id") eventId: Int,
-        @RequestParam("include-pending") includePending: Boolean
+        @RequestParam("include-pending", defaultValue = "false") includePending: Boolean
     ): ResponseEntity<List<EventPeople>?> {
 //        val eventPeople = inviteService.getEventPeople(eventId) ?: emptyList()
         val eventPeople = inviteService.getAllEventPeople(eventId, includePending) ?: emptyList()
@@ -153,22 +153,20 @@ class RestController {
         @PathVariable("event-id") eventId: Int,
         @RequestParam("user-id") userId: Int
     ): ResponseEntity<EventData> {
-//        val userId = (auth.principal as UserSecurity).id
 
-        val eventHost = eventService.getEventOwner(eventId)
-        val eventPeople = inviteService.getEventPeople(eventId)
+        val event = eventService.getEvent(eventId)
         val eventLocations = locationService.getEventLocations(eventId)
         val eventTime = eventService.getEventTimeDetail(eventId)
-//        val eventStatus = inviteService.getInviteStatus(userId.toInt(), eventId)
         val eventStatus = inviteService.getInviteStatus(userId, eventId)
 
         val eventData = EventData(
-            ownerId = eventHost!!.id!!,
-            eventHost = eventHost.username!!,
-//            eventPeople = eventPeople,
+            ownerId = event!!.user!!.id!!,
+            eventName = event.name!!,
+            eventHost = event.user!!.username!!,
             eventLocations = eventLocations,
             eventTime = eventTime,
-            eventStatus = eventStatus
+            eventStatus = eventStatus,
+            currentIndex = event.actualLocation
         )
 
         return ResponseEntity.ok(eventData)
@@ -223,7 +221,6 @@ class RestController {
         @RequestParam("page") pageNumber: Int,
         @RequestParam("size") pageSize: Int
     ): ResponseEntity<List<MessageObj>> {
-        // TODO add pagination
         val eventMessages = messageService.getEventMessages(eventId, pageNumber, pageSize) ?: return ResponseEntity.ok(emptyList())
         return ResponseEntity.ok(eventMessages)
     }
@@ -261,13 +258,11 @@ class RestController {
 
 
     //TODO consider deleting by id, no event id needed
-    @DeleteMapping(value = ["event/{event-id}/picture"])
+    @DeleteMapping(value = ["picture/{picture-id}"])
     fun deleteEventPicture(
-        @PathVariable("event-id") eventId: Int,
-        @RequestBody data: Map<String, Any>
+        @PathVariable("picture-id") pictureId: Int,
     ): ResponseEntity<String> {
-        if (!data.containsKey("picture_id")) return ResponseEntity.badRequest().body("No picture id provided")
-        return if (pictureService.deleteEventImage(eventId, data["picture_id"]!! as Int))
+        return if (pictureService.deleteEventImage(pictureId))
             ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
     }
 

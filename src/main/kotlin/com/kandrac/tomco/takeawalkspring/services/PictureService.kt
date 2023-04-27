@@ -55,7 +55,7 @@ class PictureService {
         return IOUtils.toByteArray(stream)
     }
 
-    fun deleteEventImage(eventId: Int, pictureId: Int): Boolean {
+    fun deleteEventImage(pictureId: Int): Boolean {
         val picture = pictureRepository.findPictureById(pictureId) ?: return false
         picture.deleted = true
         pictureRepository.save(picture)
