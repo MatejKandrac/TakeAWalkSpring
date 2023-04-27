@@ -229,9 +229,10 @@ class RestController {
     fun postEventMessage(
         @PathVariable("event-id") eventId: Int,
         @RequestBody message: MessageData
-    ): ResponseEntity<String> {
-        return if (messageService.addEventMessage(eventId, message))
-            ResponseEntity.ok("Success") else ResponseEntity.badRequest().body("Invalid data")
+    ): ResponseEntity<Int> {
+        val result = messageService.addEventMessage(eventId, message)
+        return if (result != null)
+            ResponseEntity.ok(result) else ResponseEntity.badRequest().body(-1)
     }
 
     @GetMapping(value = ["chat/{event-id}/device-tokens"])

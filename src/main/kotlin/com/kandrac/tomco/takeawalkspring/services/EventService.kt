@@ -11,6 +11,7 @@ import com.kandrac.tomco.takeawalkspring.repositories.LocationRepository
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.EventObj
 import com.kandrac.tomco.takeawalkspring.responseEntities.EventTimeDetailObj
+import com.kandrac.tomco.takeawalkspring.responseEntities.LocationPointObj
 import com.kandrac.tomco.takeawalkspring.responseEntities.MapEventObj
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +45,16 @@ class EventService {
 
     private val logger = LoggerFactory.getLogger(EventService::class.java)
 
+    private fun getLocationPoints(locations: List<Location>?): List<LocationPointObj> {
+        if (locations == null) return emptyList()
+
+        val locationPoints = mutableListOf<LocationPointObj>()
+
+        locations.forEach { locationPoints.add(LocationPointObj(it.latitude!!, it.longitude!!)) }
+
+        return locationPoints
+    }
+
     fun getEventOwner(eventId: Int): User? {
         val event: Event = eventRepository.findEventById(eventId) ?: return null
         return event.user!!
@@ -69,6 +80,7 @@ class EventService {
                     end = event.endDate,
                     peopleGoing = null,
                     places = event.locations!!.size,
+                    locations = getLocationPoints(event.locations),
                     eventId = event.id!!
                 )
             )
@@ -102,6 +114,7 @@ class EventService {
                     end = event.endDate,
                     peopleGoing = inviteService.countEventPeople(event.id!!),
                     places = event.locations!!.size,
+                    locations = getLocationPoints(event.locations),
                     eventId = event.id!!
                 )
             )
@@ -159,6 +172,7 @@ class EventService {
                     end = event.endDate,
                     peopleGoing = inviteService.countEventPeople(event.id!!),
                     places = event.locations!!.size,
+                    locations = getLocationPoints(event.locations),
                     eventId = event.id!!
                 )
             )
@@ -207,6 +221,7 @@ class EventService {
                     end = event.endDate,
                     peopleGoing = null,
                     places = event.locations!!.size,
+                    locations = getLocationPoints(event.locations),
                     eventId = event.id!!
                 )
             )

@@ -15,6 +15,9 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.awt.print.Pageable
 import java.sql.Timestamp
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 @Service
 class MessageService {
@@ -55,14 +58,16 @@ class MessageService {
         return resultMessages
     }
 
-    fun addEventMessage(eventId: Int, message: MessageData): Boolean {
-        val event = eventRepository.findEventById(eventId) ?: return false
-        val user = userRepository.findUserById(message.userId) ?: return false
+    fun addEventMessage(eventId: Int, message: MessageData): Int? {
+        val event = eventRepository.findEventById(eventId) ?: return null
+        val user = userRepository.findUserById(message.userId) ?: return null
         val newMessage = Message(
             event = event,
             user = user,
             message = message.message,
-            sent = Timestamp(System.currentTimeMillis())
+//            sent = Timestamp(System.currentTimeMillis())
+//            sent = Timestamp.from(Instant.now().atOffset(ZoneOffset.ofHours(2)).toInstant())
+            sent = Timestamp.from(ZonedDateTime.now().minusHours(2).toInstant())
         )
         val newDbMessage = messageRepository.save(newMessage)
 
@@ -89,7 +94,7 @@ class MessageService {
             FirebaseMessaging.getInstance().sendMulticast(remoteMessage)
         }
 
-        return true
+        return newDbMessage.id
     }
 
     fun getDeviceTokens(eventId: Int): List<String> {

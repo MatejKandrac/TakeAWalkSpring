@@ -69,7 +69,8 @@ interface EventRepository : JpaRepository<Event, Long> {
                 select u.device_token
                 from users u
                 join invites i on u.id = i.user_id
-                where i.event_id = :eventId and u.device_token is not null and u.id != :userId ;
+                where i.event_id = :eventId and u.device_token is not null and u.id != :userId
+                or u.id = :userId ;
             """,
             nativeQuery = true
     )
