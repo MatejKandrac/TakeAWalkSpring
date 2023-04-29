@@ -73,9 +73,17 @@ class MessageService {
 
         val tokens = eventRepository.getDeviceTokensForEvent(user.id!!, eventId)
 
-        logger.info(tokens.toString())
+        val ownerToken = eventRepository.getOwnerDeviceToken(eventId)
+        val allTokens = mutableListOf<String>()
 
-        if (tokens.isNotEmpty()) {
+        allTokens.addAll(tokens)
+        if (ownerToken != null) {
+            allTokens.add(ownerToken)
+        }
+
+        logger.info(allTokens.toString())
+
+        if (allTokens.isNotEmpty()) {
             val remoteMessage = MulticastMessage
                 .builder()
                 .putAllData(mapOf(
@@ -89,7 +97,7 @@ class MessageService {
                     "message_id" to "${newDbMessage.id}",
                     "message_sent" to "${newDbMessage.sent}"
                 ))
-                .addAllTokens(tokens)
+                .addAllTokens(allTokens)
                 .build()
             FirebaseMessaging.getInstance().sendMulticast(remoteMessage)
         }

@@ -69,12 +69,20 @@ interface EventRepository : JpaRepository<Event, Long> {
                 select u.device_token
                 from users u
                 join invites i on u.id = i.user_id
-                where i.event_id = :eventId and u.device_token is not null and u.id != :userId
-                or u.id = :userId ;
+                where i.event_id = :eventId and u.device_token is not null and u.id != :userId ;
             """,
             nativeQuery = true
     )
     fun getDeviceTokensForEvent(userId: Int, eventId: Int) : List<String>
+
+    @Query("""
+        SELECT device_token
+        FROM users u
+        join events e on u.id = e.owner_id
+        where e.id = :eventId ;
+    """, nativeQuery = true)
+    fun getOwnerDeviceToken(eventId: Int): String?
+
     @Query(
         """
         select e.*
