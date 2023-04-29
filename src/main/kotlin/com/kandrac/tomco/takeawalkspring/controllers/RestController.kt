@@ -1,10 +1,6 @@
 package com.kandrac.tomco.takeawalkspring.controllers
 
-import com.kandrac.tomco.takeawalkspring.payloadEntities.CreateEventData
-import com.kandrac.tomco.takeawalkspring.payloadEntities.FilterData
-import com.kandrac.tomco.takeawalkspring.payloadEntities.MessageData
-import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
-import com.kandrac.tomco.takeawalkspring.payloadEntities.WeatherData
+import com.kandrac.tomco.takeawalkspring.payloadEntities.*
 import com.kandrac.tomco.takeawalkspring.responseEntities.*
 import com.kandrac.tomco.takeawalkspring.security.UserSecurity
 import com.kandrac.tomco.takeawalkspring.services.*
@@ -166,10 +162,29 @@ class RestController {
             eventLocations = eventLocations,
             eventTime = eventTime,
             eventStatus = eventStatus,
-            currentIndex = event.actualLocation
+            currentIndex = event.actualLocation,
+            ownerLat = event.ownerLat,
+            ownerLon = event.ownerLon
         )
 
         return ResponseEntity.ok(eventData)
+    }
+
+    @PutMapping(value = ["/event/{event-id}"])
+    fun updateEvent(
+            @PathVariable("event-id") eventId: Int,
+            @RequestBody() data: EditEventData) : ResponseEntity<String?> {
+
+        if (data.deletedPictures != null) {
+            for (picture in data.deletedPictures) {
+                val result = pictureService.deleteEventImage(picture)
+                if (!result) {
+                    return  ResponseEntity.badRequest().body("Could not delete images")
+                }
+            }
+        }
+
+        return eventService.editEvent(eventId, data)
     }
 
 
@@ -243,7 +258,7 @@ class RestController {
 
     //    Event Progress
     @GetMapping(value = ["event/{event-id}/pictures"])
-    fun getEventPictures(@PathVariable("event-id") eventId: Int): ResponseEntity<List<String?>?> {
+    fun getEventPictures(@PathVariable("event-id") eventId: Int): ResponseEntity<List<ImageObj?>?> {
         val eventPictures = pictureService.getEventPictures(eventId)
         return ResponseEntity.ok(eventPictures)
     }
@@ -347,6 +362,14 @@ class RestController {
             @RequestBody() data: WeatherData
     ) : ResponseEntity<List<WeatherDateObj>>? {
         return weatherService.getWeatherData(data.lat, data.lon, data.dateStart, data.dateEnd)
+    }
+
+    @PutMapping(value = ["event/{event-id}/live-location"])
+    fun updateLiveLocation(
+            @PathVariable("event-id") eventId: Int,
+            @RequestBody data: EventLiveLocationData
+    ) : ResponseEntity<String> {
+        return eventService.updateEventLocation(eventId, data)
     }
 
 }

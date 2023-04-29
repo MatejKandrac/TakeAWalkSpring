@@ -4,6 +4,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.MulticastMessage
 import com.kandrac.tomco.takeawalkspring.entities.*
 import com.kandrac.tomco.takeawalkspring.payloadEntities.CreateEventData
+import com.kandrac.tomco.takeawalkspring.payloadEntities.EditEventData
+import com.kandrac.tomco.takeawalkspring.payloadEntities.EventLiveLocationData
 import com.kandrac.tomco.takeawalkspring.payloadEntities.FilterData
 import com.kandrac.tomco.takeawalkspring.repositories.EventRepository
 import com.kandrac.tomco.takeawalkspring.repositories.InviteRepository
@@ -91,8 +93,6 @@ class EventService {
 
 
     fun filterEvents(userId: Int, filter: FilterData): List<EventObj>? {
-//        val events = eventRepository.getAllUserEvents(userId) ?: return null
-//        val currentTime = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
 
         val currentTime = Timestamp.from(Instant.now())
 
@@ -102,7 +102,6 @@ class EventService {
             eventRepository.getAllOngoingUserEvents(userId, currentTime) ?: return null
         }
 
-//        val events = eventRepository.getAllOngoingUserEvents(userId, currentTime) ?: return null
         val resultEvents = mutableListOf<EventObj>()
 
         for (event in events) {
@@ -120,10 +119,6 @@ class EventService {
             )
         }
 
-//        events.forEach { event ->
-//            val peopleNum = inviteService.countEventPeople(event.eventId)
-//            event.peopleGoing = peopleNum
-//        }
 
         var filteredEvents = resultEvents.filter { it.peopleGoing!! >= filter.peopleGoing }
 
@@ -353,10 +348,84 @@ class EventService {
 
     fun setNextLocation(eventId: Int): ResponseEntity<String> {
         val event = eventRepository.findEventById(eventId) ?: return ResponseEntity.badRequest().body("Event does not exist")
+        val locations = locationRepository.findLocationsByEvent(event)
+        println(locations)
+        val size = locations?.size ?: 0
+        if (event.actualLocation == size) return ResponseEntity.badRequest().body("Exceeded number of locations")
         event.actualLocation++
-        if (event.actualLocation == event.locations!!.size) return ResponseEntity.badRequest().body("Exceeded number of locations")
         eventRepository.save(event)
         return ResponseEntity.ok("")
     }
     fun getEvent(eventId: Int): Event? = eventRepository.findEventById(eventId)
+
+    fun updateEventLocation(eventId: Int, data: EventLiveLocationData): ResponseEntity<String> {
+        val event = eventRepository.findEventById(eventId) ?: return ResponseEntity.badRequest().body("Event does not exist")
+        event.ownerLat = data.lat
+        event.ownerLon = data.lon
+        eventRepository.save(event)
+        return ResponseEntity.ok("Success")
+    }
+
+    fun editEvent(eventId: Int, data: EditEventData): ResponseEntity<String?> {
+        val event = eventRepository.findEventById(eventId) ?: return ResponseEntity.badRequest().body("Event does not exist")
+
+        event.start = data.start ?: event.start
+        event.endDate = data.end ?: event.endDate
+        eventRepository.save(event)
+        if (data.newLocations != null) {
+            for (location in data.newLocations) {
+                locationRepository.save(
+                        Location(
+                                name = location.name,
+                                latitude = location.lat,
+                                longitude = location.lon,
+                                locationOrder = location.order,
+                                event = event
+                        )
+                )
+            }
+        }
+
+        if (data.newPeople != null) {
+            val tokens = mutableListOf<String>()
+
+            data.newPeople.forEach {
+                val inviteUser = userRepository.findUserById(it)
+                if (inviteUser != null) {
+                    val token = inviteUser.deviceToken
+                    if (token != null) {
+                        tokens.add(token)
+                    }
+                    inviteRepository.save(
+                            Invite(
+                                    event = event,
+                                    user = inviteUser,
+                                    status = Status.PENDING.value
+                            )
+                    )
+
+                }
+            }
+
+            if (tokens.isNotEmpty()) {
+                val message = MulticastMessage
+                        .builder()
+                        .putAllData(
+                                mapOf(
+                                        "notification_title" to "New invitation",
+                                        "notification_content" to "You were invited to ${event.name}",
+                                        "event_id" to "${event.id}"
+                                )
+                        )
+                        .addAllTokens(tokens)
+                        .build()
+
+                val response = FirebaseMessaging.getInstance().sendMulticast(message)
+
+                logger.info("${response.successCount} notifications were sent successfully")
+            }
+        }
+
+        return  ResponseEntity.ok().build()
+    }
 }

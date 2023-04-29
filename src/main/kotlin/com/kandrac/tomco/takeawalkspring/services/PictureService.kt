@@ -4,6 +4,7 @@ import com.google.firebase.cloud.StorageClient
 import com.kandrac.tomco.takeawalkspring.entities.Picture
 import com.kandrac.tomco.takeawalkspring.repositories.EventRepository
 import com.kandrac.tomco.takeawalkspring.repositories.PictureRepository
+import com.kandrac.tomco.takeawalkspring.responseEntities.ImageObj
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,13 +21,16 @@ class PictureService {
     @Autowired
     lateinit var eventRepository: EventRepository
 
-    fun getEventPictures(eventId: Int): List<String?>? {
+    fun getEventPictures(eventId: Int): List<ImageObj?>? {
         val event = eventRepository.findEventById(eventId) ?: return null
-        val list = mutableListOf<String?>()
+        val list = mutableListOf<ImageObj?>()
         val pictures = pictureRepository.findPicturesByEvent(event) ?: return null
         pictures.forEach {
             if (!it.deleted)
-                list.add(it.link)
+                list.add(ImageObj(
+                        id = it.id!!,
+                        link = it.link!!
+                ))
         }
         return list.toList()
     }

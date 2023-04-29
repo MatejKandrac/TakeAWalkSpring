@@ -4,5 +4,5 @@ data class SearchPersonObj(
         val id: Int,
         val username: String,
         val bio: String?,
-        val picure: String?
+        val picture: String?
 )
