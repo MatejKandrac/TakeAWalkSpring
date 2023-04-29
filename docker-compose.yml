@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:latest
+    shm_size: 1g
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=testing
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./db/initMTAA.sql:/docker-entrypoint-initdb.d/init.sql
+
+  takeawalk-backend:
+    build: .
+    container_name: takeawalk
+    ports:
+      - 8080:8080
+    environment:
+      - DB_SERVER=db
+      - GOOGLE_SERVICE_KEY=/service.json
+      - FIREBASE_STORAGE_BUCKET=takeawalk-65934.appspot.com
+    volumes:
+      - /home/matejkandrac/.firebase/takeawalk-65934-394c2aace5fa.json:/service.json
+    depends_on:
+      - db
+    links:
+      - db
+

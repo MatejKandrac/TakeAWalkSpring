@@ -7,5 +7,7 @@ data class EventData(
     val eventLocations: List<LocationObj>,
     val eventTime: EventTimeDetailObj,
     val eventStatus: String?,
-    val currentIndex: Int
+    val currentIndex: Int,
+    val ownerLat: Double?,
+    val ownerLon: Double?
 )
