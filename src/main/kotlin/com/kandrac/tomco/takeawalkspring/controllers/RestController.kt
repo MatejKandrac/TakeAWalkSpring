@@ -46,7 +46,6 @@ class RestController {
         val invites = eventService.getAllUserInvites(userId) ?: return ResponseEntity.ok(emptyList())
 
         invites.forEach { invite ->
-//            val peopleNum = inviteService.getEventPeople(invite.eventId)?.size
             val peopleNum = inviteService.countEventPeople(invite.eventId)
             invite.peopleGoing = peopleNum
         }
@@ -60,7 +59,6 @@ class RestController {
         val events = eventService.getAllUserEvents(userId) ?: return ResponseEntity.ok(emptyList())
 
         events.forEach { event ->
-//            val peopleNum = inviteService.getEventPeople(event.eventId)?.size
             val peopleNum = inviteService.countEventPeople(event.eventId)
             event.peopleGoing = peopleNum
         }
@@ -117,7 +115,6 @@ class RestController {
     @GetMapping(value = ["/event/{event-id}/host"])
     fun getEventOwner(@PathVariable("event-id") eventId: Int): ResponseEntity<String?> {
         val owner = eventService.getEventOwner(eventId) ?: return ResponseEntity.ok("")
-//        val ownerName = owner.username
         return ResponseEntity.ok(owner.username)
     }
 
@@ -126,7 +123,6 @@ class RestController {
         @PathVariable("event-id") eventId: Int,
         @RequestParam("include-pending", defaultValue = "false") includePending: Boolean
     ): ResponseEntity<List<EventPeople>?> {
-//        val eventPeople = inviteService.getEventPeople(eventId) ?: emptyList()
         val eventPeople = inviteService.getAllEventPeople(eventId, includePending) ?: emptyList()
         return ResponseEntity.ok(eventPeople)
     }
@@ -273,7 +269,6 @@ class RestController {
     }
 
 
-    //TODO consider deleting by id, no event id needed
     @DeleteMapping(value = ["picture/{picture-id}"])
     fun deleteEventPicture(
         @PathVariable("picture-id") pictureId: Int,
@@ -315,7 +310,6 @@ class RestController {
         @RequestBody data: CreateEventData
     ): ResponseEntity<Int?> {
         val eventId = eventService.createEvent(data)
-//        return ResponseEntity.ok(eventId)
         return ResponseEntity.status(HttpStatus.CREATED).body(eventId)
     }
 

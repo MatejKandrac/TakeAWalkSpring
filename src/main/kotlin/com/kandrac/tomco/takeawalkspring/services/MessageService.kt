@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import java.awt.print.Pageable
 import java.sql.Timestamp
-import java.time.Instant
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 @Service
@@ -39,7 +36,6 @@ class MessageService {
 
         val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId, page)?.reversed() ?: return null
 
-//        val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId) ?: return null
         val resultMessages = mutableListOf<MessageObj>()
 
 
@@ -65,8 +61,6 @@ class MessageService {
             event = event,
             user = user,
             message = message.message,
-//            sent = Timestamp(System.currentTimeMillis())
-//            sent = Timestamp.from(Instant.now().atOffset(ZoneOffset.ofHours(2)).toInstant())
             sent = Timestamp.from(ZonedDateTime.now().minusHours(2).toInstant())
         )
         val newDbMessage = messageRepository.save(newMessage)

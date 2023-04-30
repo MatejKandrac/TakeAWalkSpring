@@ -5,7 +5,3 @@ data class ProfileEditData(
     val username: String?,
     val bio: String?
 )
-
-//data class PictureEdit(
-//    val
-//)

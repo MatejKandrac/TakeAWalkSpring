@@ -22,8 +22,10 @@ interface EventRepository : JpaRepository<Event, Long> {
         select e.*
         from events e
         join invites i on e.id = i.event_id
-        where i.user_id = :userId and i.status = 'ACCEPTED'
-        or e.owner_id = :userId ;
+        where i.user_id = :userId 
+        and i.status = 'ACCEPTED'
+        and e.cancelled = false
+        or e.owner_id = :userId  ;
     """,
         nativeQuery = true
     )
@@ -37,6 +39,7 @@ interface EventRepository : JpaRepository<Event, Long> {
         where i.user_id = :userId
         and e.end_date > :currentTime
         and i.status = 'ACCEPTED'
+        and e.cancelled = false
         or e.owner_id = :userId ;
     """,
         nativeQuery = true
@@ -48,7 +51,9 @@ interface EventRepository : JpaRepository<Event, Long> {
         select e.*
         from events e
         join invites i on e.id = i.event_id
-        where i.user_id = :userId and i.status = 'PENDING';
+        where i.user_id = :userId 
+        and i.status = 'PENDING'
+        and e.cancelled = false;
     """,
         nativeQuery = true
     )
@@ -90,7 +95,8 @@ interface EventRepository : JpaRepository<Event, Long> {
         join invites i on e.id = i.event_id
         where i.user_id = :userId 
         and e.end_date > :currentTime
-        and i.status = 'PENDING';
+        and i.status = 'PENDING'
+        and e.cancelled = false;
     """,
         nativeQuery = true
     )

@@ -39,7 +39,7 @@ class SecurityConfig(
         val authenticationManager = authManager(http)
 
         http
-            .authorizeHttpRequests().requestMatchers("/auth/***", "/v1/**").permitAll()
+            .authorizeHttpRequests().requestMatchers("/auth/***", "/swagger-ui.html").permitAll()
             .anyRequest().authenticated().and()
             .csrf().disable()
             .authenticationManager(authenticationManager)
