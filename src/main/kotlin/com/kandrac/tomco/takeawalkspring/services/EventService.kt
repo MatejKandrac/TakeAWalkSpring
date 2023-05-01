@@ -21,11 +21,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.sql.Timestamp
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.time.temporal.Temporal
 
 @Service
 class EventService {
@@ -295,9 +291,13 @@ class EventService {
                 .addAllTokens(tokens)
                 .build()
 
-            val response = FirebaseMessaging.getInstance().sendMulticast(message)
+            try {
+                val response = FirebaseMessaging.getInstance().sendMulticast(message)
+                logger.info("${response.successCount} notifications were sent successfully")
+            } catch (e : Exception) {
+                logger.info("Could not send notifications")
+            }
 
-            logger.info("${response.successCount} notifications were sent successfully")
         }
         return event.id
     }
@@ -340,8 +340,13 @@ class EventService {
                     ))
                     .addAllTokens(tokens)
                     .build()
-            val successCount = FirebaseMessaging.getInstance().sendMulticast(message)
-            logger.info("${successCount.successCount} notifications were sent successfully")
+
+            try {
+                val response = FirebaseMessaging.getInstance().sendMulticast(message)
+                logger.info("${response.successCount} notifications were sent successfully")
+            } catch (e : Exception) {
+                logger.info("Could not send notifications")
+            }
         }
         return event.id
     }
@@ -420,9 +425,13 @@ class EventService {
                         .addAllTokens(tokens)
                         .build()
 
-                val response = FirebaseMessaging.getInstance().sendMulticast(message)
 
-                logger.info("${response.successCount} notifications were sent successfully")
+                try {
+                    val response = FirebaseMessaging.getInstance().sendMulticast(message)
+                    logger.info("${response.successCount} notifications were sent successfully")
+                } catch (e : Exception) {
+                    logger.info("Could not send notifications")
+                }
             }
         }
 

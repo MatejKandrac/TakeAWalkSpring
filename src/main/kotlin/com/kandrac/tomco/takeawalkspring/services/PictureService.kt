@@ -6,7 +6,6 @@ import com.kandrac.tomco.takeawalkspring.repositories.EventRepository
 import com.kandrac.tomco.takeawalkspring.repositories.PictureRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.ImageObj
 import org.apache.commons.io.IOUtils
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -44,9 +43,14 @@ class PictureService {
             event = event,
             link = objectName
         )
+        try {
+            val bucket = StorageClient.getInstance().bucket()
+            bucket.create(objectName, file.inputStream, file.contentType)
+        } catch (e: Exception) {
+            print("could not save image $e")
+        }
+
         pictureRepository.save(newPicture)
-        val bucket = StorageClient.getInstance().bucket()
-        bucket.create(objectName, file.inputStream, file.contentType)
         return true
     }
 

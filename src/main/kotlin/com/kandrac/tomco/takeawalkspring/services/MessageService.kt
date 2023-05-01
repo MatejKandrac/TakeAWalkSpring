@@ -91,7 +91,13 @@ class MessageService {
                 ))
                 .addAllTokens(tokens)
                 .build()
-            FirebaseMessaging.getInstance().sendMulticast(remoteMessage)
+
+            try {
+                val response = FirebaseMessaging.getInstance().sendMulticast(remoteMessage)
+                logger.info("${response.successCount} notifications were sent successfully")
+            } catch (e : Exception) {
+                logger.info("Could not send notifications")
+            }
         }
 
         return newDbMessage.id
