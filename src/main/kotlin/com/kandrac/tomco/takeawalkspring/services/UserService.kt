@@ -1,11 +1,11 @@
 package com.kandrac.tomco.takeawalkspring.services
 
 import com.google.firebase.cloud.StorageClient
+import com.kandrac.tomco.takeawalkspring.Dto.RegisterDto
 import com.kandrac.tomco.takeawalkspring.entities.User
 import com.kandrac.tomco.takeawalkspring.payloadEntities.ProfileEditData
 import com.kandrac.tomco.takeawalkspring.repositories.UserRepository
 import com.kandrac.tomco.takeawalkspring.responseEntities.ProfileObj
-import com.kandrac.tomco.takeawalkspring.Dto.RegisterDto
 import com.kandrac.tomco.takeawalkspring.responseEntities.SearchPersonObj
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Example
@@ -51,7 +51,6 @@ class UserService {
     fun updateUserProfile(userId: Int, data: ProfileEditData) : Boolean {
         val user: User = userRepository.findUserById(userId) ?: return false
         user.username = data.username ?: user.username
-//        user.password =  data.password ?: user.password
         user.password =  if (data.password != null) passwordEncoder.encode(data.password) else user.password
         user.bio = data.bio ?: user.bio
         userRepository.save(user)

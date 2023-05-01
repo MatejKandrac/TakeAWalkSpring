@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import java.awt.print.Pageable
 import java.sql.Timestamp
-import java.time.Instant
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 @Service
@@ -39,7 +36,6 @@ class MessageService {
 
         val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId, page)?.reversed() ?: return null
 
-//        val messages: List<Message> = messageRepository.findMessagesByEvent_Id(eventId) ?: return null
         val resultMessages = mutableListOf<MessageObj>()
 
 
@@ -65,17 +61,23 @@ class MessageService {
             event = event,
             user = user,
             message = message.message,
-//            sent = Timestamp(System.currentTimeMillis())
-//            sent = Timestamp.from(Instant.now().atOffset(ZoneOffset.ofHours(2)).toInstant())
             sent = Timestamp.from(ZonedDateTime.now().minusHours(2).toInstant())
         )
         val newDbMessage = messageRepository.save(newMessage)
 
         val tokens = eventRepository.getDeviceTokensForEvent(user.id!!, eventId)
 
-        logger.info(tokens.toString())
+        val ownerToken = eventRepository.getOwnerDeviceToken(eventId)
+        val allTokens = mutableListOf<String>()
 
-        if (tokens.isNotEmpty()) {
+        allTokens.addAll(tokens)
+        if (ownerToken != null) {
+            allTokens.add(ownerToken)
+        }
+
+        logger.info(allTokens.toString())
+
+        if (allTokens.isNotEmpty()) {
             val remoteMessage = MulticastMessage
                 .builder()
                 .putAllData(mapOf(
@@ -89,7 +91,7 @@ class MessageService {
                     "message_id" to "${newDbMessage.id}",
                     "message_sent" to "${newDbMessage.sent}"
                 ))
-                .addAllTokens(tokens)
+                .addAllTokens(allTokens)
                 .build()
 
             try {

@@ -1,10 +1,10 @@
 package com.kandrac.tomco.takeawalkspring.services
 
+import com.kandrac.tomco.takeawalkspring.Dto.JwtRefreshRequestDto
+import com.kandrac.tomco.takeawalkspring.Dto.JwtResponseDto
 import com.kandrac.tomco.takeawalkspring.entities.RefreshToken
 import com.kandrac.tomco.takeawalkspring.entities.User
 import com.kandrac.tomco.takeawalkspring.repositories.RefreshTokenRepository
-import com.kandrac.tomco.takeawalkspring.Dto.JwtRefreshRequestDto
-import com.kandrac.tomco.takeawalkspring.Dto.JwtResponseDto
 import com.kandrac.tomco.takeawalkspring.security.JwtTokenUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

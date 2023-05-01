@@ -7,11 +7,9 @@ import com.kandrac.tomco.takeawalkspring.entities.User
 import com.kandrac.tomco.takeawalkspring.security.JwtTokenUtil
 import com.kandrac.tomco.takeawalkspring.services.RefreshTokenService
 import com.kandrac.tomco.takeawalkspring.services.UserService
-import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
