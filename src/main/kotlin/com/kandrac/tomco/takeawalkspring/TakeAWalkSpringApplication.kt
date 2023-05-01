@@ -1,3 +1,5 @@
+// Created by Matej Kandrac and Patrik Tomco
+
 package com.kandrac.tomco.takeawalkspring
 
 import org.springframework.boot.autoconfigure.SpringBootApplication

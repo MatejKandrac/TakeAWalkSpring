@@ -24,7 +24,7 @@ services:
       - GOOGLE_SERVICE_KEY=/service.json
       - FIREBASE_STORAGE_BUCKET=takeawalk-65934.appspot.com
     volumes:
-      - C:/Firebase/takeawalk-service-account.json:/service.json
+      - /home/matejkandrac/.firebase/takeawalk-65934-394c2aace5fa.json:/service.json
     depends_on:
       - db
     links:
